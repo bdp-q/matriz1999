@@ -1,9 +1,9 @@
 
 TARGET  = jogo
-SRC     = main.c
+SRC     = Main.c Entities/Player.c Joystick.c
  
-CFLAGS  = $(shell pkg-config allegro-5 allegro_main-5 allegro_font-5 --cflags)
-LIBS    = $(shell pkg-config allegro-5 allegro_main-5 allegro_font-5 --libs)
+CFLAGS  = -I. -IEntities $(shell pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 --cflags)
+LIBS    = $(shell pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 --libs)
   
 all: $(TARGET)
  
