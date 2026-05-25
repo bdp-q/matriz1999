@@ -7,50 +7,80 @@
 #include <stdio.h>
 
 int main(){
-	al_init();																		//Faz a preparação de requisitos da biblioteca Allegro
-	al_install_keyboard();															//Habilita a entrada via teclado (eventos de teclado), no programa
+	//inicializações da allegro
+	al_init();																		
+	al_install_keyboard();																		
 	al_init_primitives_addon();	
 
-    al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW); // eixa a tela fullscreen
+    al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW); // deixa a tela fullscreen
 
-	ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);								//Cria o relógio do jogo; isso indica quantas atualizações serão realizadas por segundo (30, neste caso)
-	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();							//Cria a fila de eventos; todos os eventos (programação orientada a eventos) 
-	ALLEGRO_FONT* font = al_create_builtin_font();									//Carrega uma fonte padrão para escrever na tela (é bitmap, mas também suporta adicionar fontes ttf)
-	ALLEGRO_DISPLAY* disp = al_create_display(320, 320);							//Cria uma janela para o programa, define a largura (x) e a altura (y) da tela em píxeis (320x320, neste caso)
+	ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);		//define o fps do jogo
+	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();	//Cria a fila de eventos
+	ALLEGRO_FONT* font = al_create_builtin_font();			//Carrega uma fonte padrão para escrever na tela
+	ALLEGRO_DISPLAY* disp = al_create_display(1920, 1080);	//Cria uma janela padrão para o programa 
 
+	//pego o tamanho da sua tela fullscreen
 	ALLEGRO_DISPLAY_MODE disp_data;
 	al_get_display_mode(0, &disp_data);
 
 	int x_screen = disp_data.width;  // x da tela
 	int y_screen = disp_data.height; // y da tela
 
-
-	al_register_event_source(queue, al_get_keyboard_event_source());				//Indica que eventos de teclado serão inseridos na nossa fila de eventos
-	al_register_event_source(queue, al_get_display_event_source(disp));				//Indica que eventos de tela serão inseridos na nossa fila de eventos
-	al_register_event_source(queue, al_get_timer_event_source(timer));				//Indica que eventos de relógio serão inseridos na nossa fila de eventos
+	// indica que eventos de teclado, tela e tempo vão ativar nossa fila de eventos
+	al_register_event_source(queue, al_get_keyboard_event_source());
+	al_register_event_source(queue, al_get_display_event_source(disp));
+	al_register_event_source(queue, al_get_timer_event_source(timer));
 
 
 	player* player = player_create(50, x_screen/2, y_screen/2, x_screen, y_screen,10);
 	if (!player) return 1;	
 
 
-	ALLEGRO_EVENT event;															//Variável que guarda um evento capturado, sua estrutura é definida em: https://www.allegro.cc/manual/5/ALLEGRO_EVENT
-	al_start_timer(timer);															//Função que inicializa o relógio do programa
-	while(1){																		//Laço principal do programa
-		al_wait_for_event(queue, &event);											//Função que captura eventos da fila, inserindo os mesmos na variável de eventos
+	ALLEGRO_EVENT event;
+	al_start_timer(timer);
+
+	//laço principal do nosso programa															
+	while(1){
+		al_wait_for_event(queue, &event); //func que observa e coloca eventos na fila (os que falamos que é pra ativar)	
 		
-		if (event.type == 30){														//O evento tipo 30 indica um evento de relógio, ou seja, verificação se a tela deve ser atualizada (conceito de FPS)
-			al_clear_to_color(al_map_rgb(0, 0, 0));									//Substitui tudo que estava desenhado na tela por um fundo preto
-    		al_draw_filled_rectangle(player->x-player->side/2, player->y-player->side/2, player->x+player->side/2, player->y+player->side/2, al_map_rgb(255, 0, 0));
-			al_flip_display();														//Insere as modificações realizadas nos buffers de tela
+		//eventos de relogio: o que precisa acontecer a cada frame
+		if (event.type == 30){
+			//calcula a gravidade
+			player_update(player,x_screen, y_screen);
+
+			fprintf(stderr,"%f\n",player->gravity);
+			//pinta a tela e os personagens
+			al_clear_to_color(al_map_rgb(0, 0, 0));	
+    		al_draw_filled_rectangle(player->x-player->side/2, player->y-player->side/2, player->x+player->side/2, player->y+player->side/2, al_map_rgb(255, 0, 0)); 
+			al_flip_display();
 		}
-		else if (event.type == 42) break;											//Evento de clique no "X" de fechamento da tela. Encerra o programa graciosamente.
+		else if((event.type == 10) || (event.type == 12)){	//eventos de teclado 
+			
+			if(event.keyboard.keycode == ALLEGRO_KEY_SPACE){ // pulou (espaço)
+				joystick_up(player->control);
+				if((event.type == 12 && player->gravity < 0))
+					player->gravity *= 0.6;
+			}
+
+			else if(event.keyboard.keycode == ALLEGRO_KEY_A || event.keyboard.keycode == ALLEGRO_KEY_LEFT) //movimento pra esquerda (a ou setinha)
+				joystick_left(player->control);
+			
+			else if(event.keyboard.keycode == ALLEGRO_KEY_D || event.keyboard.keycode == ALLEGRO_KEY_RIGHT) //movimento pra direita (d ou setinha)
+				joystick_right(player->control);
+			
+			
+			
+		}
+		else if (event.type == 42) break;	//Evento de clique no "X" de fechamento da tela
+	
 	}
 
-	al_destroy_font(font);															//Destrutor da fonte padrão
-	al_destroy_display(disp);														//Destrutor da tela
-	al_destroy_timer(timer);														//Destrutor do relógio
-	al_destroy_event_queue(queue);													//Destrutor da fila
+	//funções destrutoras para limpar a casa antes do programa acabar
+	player_destroy(player);
+	al_destroy_font(font);															
+	al_destroy_display(disp);														
+	al_destroy_timer(timer);														
+	al_destroy_event_queue(queue);													
 
 	return 0;
 }
