@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include "Player.h"
+#include "Rooms/Room.h"
 #include<stdio.h>
 #define GRAVITY 0.9f
-#define MAX_FALL 12.0f
+#define MAX_FALL 10.0f
 
 player* player_create(unsigned char side, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned char hp){	
 	
@@ -32,7 +33,20 @@ void player_move(player *p, char steps, unsigned char trajectory, unsigned short
 	}
 }
 
-void player_update(player *p, unsigned short max_x, unsigned short max_y){
+int player_colision(player *p, room *r, unsigned short x_screen, unsigned short y_screen){
+	int pos_tile_row =  (int) p->x / (x_screen / ROOM_ROWS);
+	int pos_tile_col = (int) (p->y-1 + (y_screen / ROOM_COLS)) / (y_screen / ROOM_COLS);
+	fprintf(stderr,"%d\n",pos_tile_row);
+	fprintf(stderr,"%d\n",pos_tile_col);
+	if (r->tiles[pos_tile_row][pos_tile_col] == TILE_WALL)
+		return 1;
+	return 0;
+
+}
+
+void player_update(player *p, room *r, unsigned short max_x, unsigned short max_y){
+	
+	
 	if (p->control->left){				 //altera a posição do jogador pra esq																																				
 		player_move(p, 1, 0, max_x, max_y);																																				
 																										
@@ -42,7 +56,8 @@ void player_update(player *p, unsigned short max_x, unsigned short max_y){
 	}
 
 
-	if(p->y + p->side/2 >= max_y){		//verifica se o jogador esta no chão
+	
+	if(player_colision(p,r,max_x,max_y)){		//verifica se o jogador esta no chão
 		p->gravity = 0;
 		p->is_down = 1;
 	}
@@ -60,6 +75,7 @@ void player_update(player *p, unsigned short max_x, unsigned short max_y){
 	if(p->gravity > MAX_FALL)
 		p->gravity = MAX_FALL;
 	p->y += (short)p->gravity;
+
 
 	return;
 }

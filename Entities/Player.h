@@ -2,7 +2,7 @@
 #define __PLAYER__
 
 #include "Joystick.h"			//onde fica o movimento do jogador																										
-
+#include "Rooms/Room.h"
 #define PLAYER_STEP 10			//Tamanho, em pixels, de um passo do jogador (movimento)
 
 typedef struct {		
@@ -23,7 +23,7 @@ player* player_create(unsigned char side, unsigned short x, unsigned short y, un
 void player_move(player *p, char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y);
 
 //função que atualiza o jogador
-void player_update(player *p, unsigned short max_x, unsigned short max_y);
+void player_update(player *p,room *r, unsigned short max_x, unsigned short max_y);
 
 //função que libera a memória do jogador na hora do programa encerrar
 void player_destroy(player *p);

@@ -49,8 +49,7 @@ int main(){
 		//eventos de relogio: o que precisa acontecer a cada frame
 		if (event.type == 30){
 			//calcula a gravidade
-			player_update(player,x_screen, y_screen);
-			fprintf(stderr,"%f\n",player->gravity);
+			player_update(player,&room1, x_screen, y_screen);
 			//pinta a tela e os personagens
 			al_clear_to_color(al_map_rgb(0, 0, 0));	
     		room_draw(&room1,tile_w,tile_h);
