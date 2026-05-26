@@ -3,7 +3,8 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>														
 #include "Player.h"
-
+#include "Rooms/Room.h"
+#include "Rooms/Room1.h"
 #include <stdio.h>
 
 int main(){
@@ -35,6 +36,8 @@ int main(){
 	player* player = player_create(50, x_screen/2, y_screen/2, x_screen, y_screen,10);
 	if (!player) return 1;	
 
+	int tile_w = x_screen / ROOM_COLS;
+	int tile_h = y_screen / ROOM_ROWS;
 
 	ALLEGRO_EVENT event;
 	al_start_timer(timer);
@@ -47,18 +50,18 @@ int main(){
 		if (event.type == 30){
 			//calcula a gravidade
 			player_update(player,x_screen, y_screen);
-
 			fprintf(stderr,"%f\n",player->gravity);
 			//pinta a tela e os personagens
 			al_clear_to_color(al_map_rgb(0, 0, 0));	
-    		al_draw_filled_rectangle(player->x-player->side/2, player->y-player->side/2, player->x+player->side/2, player->y+player->side/2, al_map_rgb(255, 0, 0)); 
+    		room_draw(&room1,tile_w,tile_h);
+			al_draw_filled_rectangle(player->x-player->side/2, player->y-player->side/2, player->x+player->side/2, player->y+player->side/2, al_map_rgb(255, 0, 0)); 
 			al_flip_display();
 		}
 		else if((event.type == 10) || (event.type == 12)){	//eventos de teclado 
 			
 			if(event.keyboard.keycode == ALLEGRO_KEY_SPACE){ // pulou (espaço)
 				joystick_up(player->control);
-				if((event.type == 12 && player->gravity < 0))
+				if((event.type == 12 && player->gravity < 0))// se o jogador soltar o espaço ele pula menos!
 					player->gravity *= 0.6;
 			}
 

@@ -23,10 +23,12 @@ player* player_create(unsigned char side, unsigned short x, unsigned short y, un
 void player_move(player *p, char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y){
 	//verifica se é possível e dai vai se for!
 	if (!trajectory){
-		if ((p->x - steps*PLAYER_STEP) - p->side/2 >= 0) p->x = p->x - steps*PLAYER_STEP; //esquerda
+		if ((p->x - steps*PLAYER_STEP) - p->side/2 >= 0) 
+			p->x = p->x - steps*PLAYER_STEP; //esquerda
 	} 				
 	else if (trajectory == 1){
-		if ((p->x + steps*PLAYER_STEP) + p->side/2 <= max_x) p->x = p->x + steps*PLAYER_STEP; //direita
+		if ((p->x + steps*PLAYER_STEP) + p->side/2 <= max_x)
+			p->x = p->x + steps*PLAYER_STEP; //direita
 	}
 }
 
@@ -60,7 +62,7 @@ void player_update(player *p, unsigned short max_x, unsigned short max_y){
 	p->y += (short)p->gravity;
 
 	return;
-}	
+}
 
 void player_destroy(player *p){																													//Implementação da função "player_destroy"
 	joystick_destroy(p->control);																											//Destrói controle do quadrado (!)
