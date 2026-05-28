@@ -33,15 +33,20 @@ void player_move(player *p, char steps, unsigned char trajectory, unsigned short
 	}
 }
 
-int player_colision(player *p, room *r, unsigned short x_screen, unsigned short y_screen){
-	int pos_tile_col =  (int) p->x / (x_screen / ROOM_COLS);
+int colision_bottom(player *p, room *r, unsigned short x_screen, unsigned short y_screen){
+	int pos_tile_col =  (int) (p->x + p->side/2) / (x_screen / ROOM_COLS);
 	int pos_tile_row = (int) (p->y + p->side/2) / (y_screen / ROOM_ROWS);
-	fprintf(stderr,"%d\n",pos_tile_row);
-	fprintf(stderr,"%d\n",pos_tile_col);
+	if (r->tiles[pos_tile_row][pos_tile_col] == TILE_FLOOR)
+		return 1;
+	return 0;
+}
+
+int colision_left(player *p, room *r, unsigned short x_screen, unsigned short y_screen){
+	int pos_tile_col =  (int) (p->x - p->side/2) / (x_screen / ROOM_COLS);
+	int pos_tile_row = (int) (p->y + p->side/2) / (y_screen / ROOM_ROWS);
 	if (r->tiles[pos_tile_row][pos_tile_col] == TILE_WALL)
 		return 1;
 	return 0;
-
 }
 
 void player_update(player *p, room *r, unsigned short max_x, unsigned short max_y){
@@ -49,32 +54,36 @@ void player_update(player *p, room *r, unsigned short max_x, unsigned short max_
 	
 	if (p->control->left){				 //altera a posição do jogador pra esq																																				
 		player_move(p, 1, 0, max_x, max_y);																																				
-																										
+		if(colision_left(p,r,max_x,max_y))
+			player_move(p,1,1,max_x,max_y);														
 	}
 	if (p->control->right){				//altera a posição do jogador pra dir
-		player_move(p, 1, 1, max_x, max_y);
+		player_move(p, 1, 1, max_x, max_y);	
 	}
 
-
-	
-	if(player_colision(p,r,max_x,max_y)){		//verifica se o jogador esta no chão
-		p->gravity = 0;
-		p->is_down = 1;
-	}
-
-	if(p->control->up && p->is_down){		//faz o jogador pular se ele estiver no chão
-		p->gravity = -18.0f;
-		p->y += (short)p->gravity;
-		fprintf(stderr,"ENTREI");
-		p->is_down = 0;
-		return;
-	}
 
 	p->gravity += GRAVITY;
 
 	if(p->gravity > MAX_FALL)
 		p->gravity = MAX_FALL;
 	p->y += (short)p->gravity;
+	
+	if(colision_bottom(p,r,max_x,max_y)){		//verifica se o jogador esta no chão
+		p->y = ((p->y + p->side/2) / (max_y / ROOM_ROWS)) * (max_y / ROOM_ROWS) - p->side/2;
+		p->gravity = 0;
+		p->is_down = 1;
+	}
+	else{
+		p->is_down = 0;
+	}
+
+	if(p->control->up && p->is_down){		//faz o jogador pular se ele estiver no chão
+		p->gravity = -18.0f;
+		fprintf(stderr,"ENTREI");
+		p->is_down = 0;
+		return;
+	}
+
 
 
 	return;
