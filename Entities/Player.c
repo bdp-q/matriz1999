@@ -34,8 +34,8 @@ void player_move(player *p, char steps, unsigned char trajectory, unsigned short
 }
 
 int player_colision(player *p, room *r, unsigned short x_screen, unsigned short y_screen){
-	int pos_tile_row =  (int) p->x / (x_screen / ROOM_ROWS);
-	int pos_tile_col = (int) (p->y-1 + (y_screen / ROOM_COLS)) / (y_screen / ROOM_COLS);
+	int pos_tile_col =  (int) p->x / (x_screen / ROOM_COLS);
+	int pos_tile_row = (int) (p->y + p->side/2) / (y_screen / ROOM_ROWS);
 	fprintf(stderr,"%d\n",pos_tile_row);
 	fprintf(stderr,"%d\n",pos_tile_col);
 	if (r->tiles[pos_tile_row][pos_tile_col] == TILE_WALL)
