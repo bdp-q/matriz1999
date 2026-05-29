@@ -61,7 +61,7 @@ int main(){
 			if(event.keyboard.keycode == ALLEGRO_KEY_SPACE){ // pulou (espaço)
 				joystick_up(player->control);
 				if((event.type == 12 && player->gravity < 0))// se o jogador soltar o espaço ele pula menos!
-					player->gravity *= 0.6;
+					player->gravity *= 0.5;
 			}
 
 			else if(event.keyboard.keycode == ALLEGRO_KEY_A || event.keyboard.keycode == ALLEGRO_KEY_LEFT) //movimento pra esquerda (a ou setinha)
