@@ -33,7 +33,7 @@ int main(){
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 
 
-	player* player = player_create(50, x_screen/2, y_screen/2, x_screen, y_screen,10);
+	player* player = player_create(x_screen/30, x_screen/2, y_screen/2, x_screen, y_screen,10);
 	if (!player) return 1;	
 
 	int tile_w = x_screen / ROOM_COLS;
@@ -49,10 +49,10 @@ int main(){
 		//eventos de relogio: o que precisa acontecer a cada frame
 		if (event.type == 30){
 			//calcula a gravidade
-			player_update(player,&room1, x_screen, y_screen);
+			player_update(player,&player->room, x_screen, y_screen);
 			//pinta a tela e os personagens
 			al_clear_to_color(al_map_rgb(0, 0, 0));	
-    		room_draw(&room1,tile_w,tile_h);
+    		room_draw(&player->room,tile_w,tile_h);
 			al_draw_filled_rectangle(player->x-player->side/2, player->y-player->side/2, player->x+player->side/2, player->y+player->side/2, al_map_rgb(255, 0, 0)); 
 			al_flip_display();
 		}

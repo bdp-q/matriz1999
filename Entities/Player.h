@@ -3,7 +3,7 @@
 
 #include "Joystick.h"			//onde fica o movimento do jogador																										
 #include "Rooms/Room.h"
-#define PLAYER_STEP 10			//Tamanho, em pixels, de um passo do jogador (movimento)
+#define PLAYER_STEP 15			//Tamanho, em pixels, de um passo do jogador (movimento)
 
 typedef struct {		
 	unsigned char side;			//Tamanmho da lateral da hitbox do jogador
@@ -12,7 +12,8 @@ typedef struct {
 	unsigned char hp;
 	char is_down;				//diz se o jogador esta tocando em algo no chão
 	float gravity;				//velocidade puxando ele pra baixo
-	joystick *control;			// movimento dele fica nessa struct																						
+	joystick *control;			// movimento dele fica nessa struct	
+	room room;																					
 
 } player;						//Struct do jogador
 

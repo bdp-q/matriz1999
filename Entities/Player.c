@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "Player.h"
 #include "Rooms/Room.h"
+#include "Room1.h"
 #include<stdio.h>
 #define GRAVITY 1.0f
 #define MAX_FALL 12.0f
@@ -17,19 +18,18 @@ player* player_create(unsigned char side, unsigned short x, unsigned short y, un
 	new_player->x = x;																												
 	new_player->y = y;																													
 	new_player->hp = hp;
-	new_player->control = joystick_create();																							
+	new_player->control = joystick_create();
+    new_player->room = room1;																							
 	return new_player;																															
 }
 
 void player_move(player *p, char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y){
 	//verifica se é possível e dai vai se for!
 	if (!trajectory){
-		if ((p->x - steps*PLAYER_STEP) - p->side/2 >= 0) 
-			p->x = p->x - steps*PLAYER_STEP; //esquerda
+		p->x = p->x - steps*PLAYER_STEP; //esquerda
 	} 				
 	else if (trajectory == 1){
-		if ((p->x + steps*PLAYER_STEP) + p->side/2 <= max_x)
-			p->x = p->x + steps*PLAYER_STEP; //direita
+		p->x = p->x + steps*PLAYER_STEP; //direita
 	}
 }
 
@@ -50,7 +50,8 @@ int colision_right(player *p, room *r, unsigned short x_screen, unsigned short y
     int col      = (int)(p->x + p->side/2 - 1) / tile_w;
     int row_top  = (int)(p->y - p->side/2) / tile_h;
     int row_bot  = (int)(p->y + p->side/2 - 1) / tile_h;
-
+    
+    
     return r->tiles[row_top][col] != TILE_EMPTY ||
            r->tiles[row_bot][col] != TILE_EMPTY;
 }
@@ -91,7 +92,7 @@ void player_update(player *p, room *r, unsigned short max_x, unsigned short max_
     }
 
     if(p->control->up && p->is_down){
-        p->gravity = -18.0f;
+        p->gravity = -24.0f;
         p->is_down = 0;
     }
 
@@ -102,7 +103,7 @@ void player_update(player *p, room *r, unsigned short max_x, unsigned short max_
     
 	if(colision_top(p,r,max_x,max_y)){
 		p->y = ((int)(p->y - p->side/2) / (max_y/ROOM_ROWS) + 1) * (max_y/ROOM_ROWS) + p->side/2;
-    	p->gravity = 0;
+    	p->gravity = 3.0f;
     }
 
 	if(colision_bottom(p,r,max_x,max_y)){
@@ -112,7 +113,17 @@ void player_update(player *p, room *r, unsigned short max_x, unsigned short max_
     } else {
         p->is_down = 0;
     }
-	
+
+    if (p->x - p->side/2 <= 0){
+        p->room = room1;
+        p->x = max_x - p->side;
+    }
+
+    if (p->x + p->side/2 >= max_x){
+        p->room = room2;
+        p->x = p->side;
+    }
+
 }
 
 void player_destroy(player *p){																													//Implementação da função "player_destroy"
