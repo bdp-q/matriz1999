@@ -78,16 +78,16 @@ int colision_top(player *p, room *r, unsigned short x_screen, unsigned short y_s
            r->tiles[row][col_right]!= TILE_EMPTY;
 }
 
-void player_update(player *p, room *r, unsigned short max_x, unsigned short max_y){
+void player_update(player *p, room r[], unsigned short max_x, unsigned short max_y){
 
     if (p->control->left){
         player_move(p, 1, 0, max_x, max_y);
-        if(colision_left(p,r,max_x,max_y))
+        if(colision_left(p,&p->room,max_x,max_y))
             p->x = ((int)(p->x - p->side/2) / (max_x/ROOM_COLS) + 1) * (max_x/ROOM_COLS) + p->side/2;
     }
     if (p->control->right){
         player_move(p, 1, 1, max_x, max_y);
-        if(colision_right(p,r,max_x,max_y))
+        if(colision_right(p,&p->room,max_x,max_y))
             p->x = ((int)(p->x + p->side/2 - 1) / (max_x/ROOM_COLS)) * (max_x/ROOM_COLS) - p->side/2;
     }
 
@@ -101,12 +101,12 @@ void player_update(player *p, room *r, unsigned short max_x, unsigned short max_
 		p->gravity = MAX_FALL;
 	p->y += p->gravity;
     
-	if(colision_top(p,r,max_x,max_y)){
+	if(colision_top(p,&p->room,max_x,max_y)){
 		p->y = ((int)(p->y - p->side/2) / (max_y/ROOM_ROWS) + 1) * (max_y/ROOM_ROWS) + p->side/2;
     	p->gravity = 3.0f;
     }
 
-	if(colision_bottom(p,r,max_x,max_y)){
+	if(colision_bottom(p,&p->room,max_x,max_y)){
         p->y = ((int)(p->y + p->side/2) / (max_y/ROOM_ROWS)) * (max_y/ROOM_ROWS) - p->side/2;
         p->gravity = 0;
         p->is_down = 1;
@@ -115,12 +115,12 @@ void player_update(player *p, room *r, unsigned short max_x, unsigned short max_
     }
 
     if (p->x - p->side/2 <= 0){
-        p->room = room1;
         p->x = max_x - p->side;
     }
 
-    if (p->x + p->side/2 >= max_x){
-        p->room = room2;
+    if (p->x + p->side/2 >= max_x){ //vai para a direita
+        p->room = r[p->room.right_id];
+        fprintf(stderr,"%d\n",p->room.right_id);
         p->x = p->side;
     }
 

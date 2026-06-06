@@ -10,10 +10,12 @@
 #define ROOM_COLS   16
 #define TILE_SIZE   64
 
-
 typedef struct {
     int tiles[10][16];
-    struct room * right; //tem que fazer isso
+    int right_id;
+    int left_id;
+    int top_id;
+    int bottom_id;
 } room;
 
 void room_draw(room *r,int tile_w, int tile_h);
