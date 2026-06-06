@@ -7,6 +7,9 @@
 #include "Rooms/Room1.h"
 #include <stdio.h>
 
+#define GAME_W 1920
+#define GAME_H 1080
+
 int main(){
 	//inicializações da allegro
 	al_init();																		
@@ -22,11 +25,20 @@ int main(){
 
 	//pego o tamanho da sua tela fullscreen
 	ALLEGRO_DISPLAY_MODE disp_data;
-	al_get_display_mode(0, &disp_data);
+	int real_w = al_get_display_width(disp);
+	int real_h = al_get_display_height(disp);
+	
+	float scale = (float)real_h / GAME_H; //escala do jogo
 
-	int x_screen = disp_data.width;  // x da tela
-	int y_screen = disp_data.height; // y da tela
+	float offset_x = (real_w - GAME_W * scale) / 2.0f; // centraliza a tela do jogo para o meio
+	float offset_y = 0.0f; //o jogo deve sempre ocupar 100% da vertical
 
+	//permite transformar em escala os desenhos da tela
+	ALLEGRO_TRANSFORM transform;
+	al_identity_transform(&transform);
+	al_scale_transform(&transform, scale, scale);
+	al_translate_transform(&transform, offset_x, offset_y);
+	
 	// indica que eventos de teclado, tela e tempo vão ativar nossa fila de eventos
 	al_register_event_source(queue, al_get_keyboard_event_source());
 	al_register_event_source(queue, al_get_display_event_source(disp));
@@ -34,11 +46,11 @@ int main(){
 
 	room rooms[] = {room1,room2,room3};
 
-	player* player = player_create(x_screen/30, x_screen/2, y_screen/2, x_screen, y_screen,10);
+	player* player = player_create(GAME_W/30, GAME_W/2, GAME_H/2, GAME_W, GAME_H,10);
 	if (!player) return 1;	
 
-	int tile_w = x_screen / ROOM_COLS;
-	int tile_h = y_screen / ROOM_ROWS;
+	int tile_w = GAME_W / ROOM_COLS;
+	int tile_h = GAME_H / ROOM_ROWS;
 
 	ALLEGRO_EVENT event;
 	al_start_timer(timer);
@@ -46,11 +58,11 @@ int main(){
 	//laço principal do nosso programa															
 	while(1){
 		al_wait_for_event(queue, &event); //func que observa e coloca eventos na fila (os que falamos que é pra ativar)	
-		
+		al_use_transform(&transform);
 		//eventos de relogio: o que precisa acontecer a cada frame
 		if (event.type == 30){
 			//calcula a gravidade
-			player_update(player,rooms, x_screen, y_screen);
+			player_update(player,rooms, GAME_W, GAME_H);
 			//pinta a tela e os personagens
 			al_clear_to_color(al_map_rgb(0, 0, 0));	
     		room_draw(&player->room,tile_w,tile_h);
