@@ -6,12 +6,11 @@
 #define TILE_FLOOR  2
 #define TILE_SPIKE  3
 
-#define ROOM_ROWS   10
-#define ROOM_COLS   16
-#define TILE_SIZE   64
+#define ROOM_ROWS   33
+#define ROOM_COLS   60
 
 typedef struct {
-    int tiles[10][16];
+    int tiles[33][60];
     int right_id;
     int left_id;
     int top_id;

@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "Player.h"
 #include "Rooms/Room.h"
-#include "Room1.h"
 #include<stdio.h>
 #define GRAVITY 1.0f
 #define MAX_FALL 12.0f
@@ -19,7 +18,7 @@ player* player_create(unsigned char side, unsigned short x, unsigned short y, un
 	new_player->y = y;																													
 	new_player->hp = hp;
 	new_player->control = joystick_create();
-    new_player->room = room1;																							
+    new_player->room_id = 0;																							
 	return new_player;																															
 }
 
@@ -78,16 +77,16 @@ int colision_top(player *p, room *r, unsigned short x_screen, unsigned short y_s
            r->tiles[row][col_right]!= TILE_EMPTY;
 }
 
-void player_update(player *p, room r[], unsigned short max_x, unsigned short max_y){
+void player_update(player *p, room rooms[], unsigned short max_x, unsigned short max_y){
 
     if (p->control->left){
         player_move(p, 1, 0, max_x, max_y);
-        if(colision_left(p,&p->room,max_x,max_y))
+        if(colision_left(p,&rooms[p->room_id],max_x,max_y))
             p->x = ((int)(p->x - p->side/2) / (max_x/ROOM_COLS) + 1) * (max_x/ROOM_COLS) + p->side/2;
     }
     if (p->control->right){
         player_move(p, 1, 1, max_x, max_y);
-        if(colision_right(p,&p->room,max_x,max_y))
+        if(colision_right(p,&rooms[p->room_id],max_x,max_y))
             p->x = ((int)(p->x + p->side/2 - 1) / (max_x/ROOM_COLS)) * (max_x/ROOM_COLS) - p->side/2;
     }
 
@@ -101,12 +100,12 @@ void player_update(player *p, room r[], unsigned short max_x, unsigned short max
 		p->gravity = MAX_FALL;
 	p->y += p->gravity;
     
-	if(colision_top(p,&p->room,max_x,max_y)){
+	if(colision_top(p,&rooms[p->room_id],max_x,max_y)){
 		p->y = ((int)(p->y - p->side/2) / (max_y/ROOM_ROWS) + 1) * (max_y/ROOM_ROWS) + p->side/2;
     	p->gravity = 3.0f;
     }
 
-	if(colision_bottom(p,&p->room,max_x,max_y)){
+	if(colision_bottom(p,&rooms[p->room_id],max_x,max_y)){
         p->y = ((int)(p->y + p->side/2) / (max_y/ROOM_ROWS)) * (max_y/ROOM_ROWS) - p->side/2;
         p->gravity = 0;
         p->is_down = 1;
@@ -115,12 +114,12 @@ void player_update(player *p, room r[], unsigned short max_x, unsigned short max
     }
 
     if (p->x - p->side/2 <= 0){
+        p->room_id = rooms[p->room_id].left_id;
         p->x = max_x - p->side;
     }
 
     if (p->x + p->side/2 >= max_x){ //vai para a direita
-        p->room = r[p->room.right_id];
-        fprintf(stderr,"%d\n",p->room.right_id);
+        p->room_id = rooms[p->room_id].right_id;
         p->x = p->side;
     }
 

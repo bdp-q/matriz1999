@@ -4,7 +4,7 @@
 #include <allegro5/allegro_primitives.h>														
 #include "Player.h"
 #include "Rooms/Room.h"
-#include "Rooms/Room1.h"
+#include "Rooms/Rooms.h"
 #include <stdio.h>
 
 #define GAME_W 1920
@@ -44,9 +44,9 @@ int main(){
 	al_register_event_source(queue, al_get_display_event_source(disp));
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 
-	room rooms[] = {room1,room2,room3};
+	room rooms[] = {room0,room1,room2};
 
-	player* player = player_create(GAME_W/30, GAME_W/2, GAME_H/2, GAME_W, GAME_H,10);
+	player* player = player_create(GAME_W/60, GAME_W/2, GAME_H/2, GAME_W, GAME_H,10);
 	if (!player) return 1;	
 
 	int tile_w = GAME_W / ROOM_COLS;
@@ -65,7 +65,7 @@ int main(){
 			player_update(player,rooms, GAME_W, GAME_H);
 			//pinta a tela e os personagens
 			al_clear_to_color(al_map_rgb(0, 0, 0));	
-    		room_draw(&player->room,tile_w,tile_h);
+    		room_draw(&rooms[player->room_id],tile_w,tile_h);
 			al_draw_filled_rectangle(player->x-player->side/2, player->y-player->side/2, player->x+player->side/2, player->y+player->side/2, al_map_rgb(255, 0, 0)); 
 			al_flip_display();
 		}

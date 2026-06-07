@@ -13,7 +13,7 @@ typedef struct {
 	char is_down;				//diz se o jogador esta tocando em algo no chão
 	float gravity;				//velocidade puxando ele pra baixo
 	joystick *control;			// movimento dele fica nessa struct	
-	room room;																					
+	int room_id;				//id do quarto que o player atualmente esta																					
 
 } player;						//Struct do jogador
 
