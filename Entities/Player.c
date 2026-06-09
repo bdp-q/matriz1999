@@ -4,8 +4,7 @@
 #include<stdio.h>
 #define GRAVITY 1.0f
 #define MAX_FALL 12.0f
-#define IDLE 0
-#define CORRENDO 1
+
 
 player* player_create(unsigned char side, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned char hp){	
 	
@@ -24,7 +23,8 @@ player* player_create(unsigned char side, unsigned short x, unsigned short y, un
     new_player->anim_frame=0;
     new_player->anim_timer=0;
     new_player->direcao=1;	
-    new_player->anim_state=IDLE;																						
+    new_player->anim_state=IDLE;	
+    new_player->anim_velocity= 16;																					
 	return new_player;																															
 }
 
@@ -86,60 +86,105 @@ int colision_top(player *p, room *r, unsigned short x_screen, unsigned short y_s
            tile_has_collision(r->tiles[row][col_right]);
 }
 
+static int anim_num_frames(int state){
+    switch(state) {
+        case IDLE: return 2;
+        case CORRENDO: return 6; 
+        case PULANDO: return 4;
+        case DOWN: return 4;
+//        case ACAO: return ?;
+    }
+}
+
 void player_update(player *p, room rooms[], unsigned short max_x, unsigned short max_y){
-
-    if (p->control->left){
-        p->direcao=0;
-        p->anim_state=CORRENDO;
-        player_move(p, 1, 0, max_x, max_y);
-        if(colision_left(p,&rooms[p->room_id],max_x,max_y))
-            p->x = ((int)(p->x - p->side/2) / (max_x/ROOM_COLS) + 1) * (max_x/ROOM_COLS) + p->side/2;
-    }
-    if (p->control->right){
-        p->direcao=1;
-        p->anim_state=CORRENDO;
-        player_move(p, 1, 1, max_x, max_y);
-        if(colision_right(p,&rooms[p->room_id],max_x,max_y))
-            p->x = ((int)(p->x + p->side/2 - 1) / (max_x/ROOM_COLS)) * (max_x/ROOM_COLS) - p->side/2;
-    }
-
-    if(p->control->up && p->is_down){
-        p->gravity = -12.0f;
-        p->is_down = 0;
-    }
-
-    p->gravity += GRAVITY;
-    if(p->gravity > MAX_FALL) 
-		p->gravity = MAX_FALL;
-	p->y += p->gravity;
+    int prev_state = p->anim_state;
     
-	if(colision_top(p,&rooms[p->room_id],max_x,max_y)){
-		p->y = ((int)(p->y - p->side/2) / (max_y/ROOM_ROWS) + 1) * (max_y/ROOM_ROWS) + p->side/2;
-    	p->gravity = 3.0f;
+    if(!p->control->down || !p->is_down){
+        if (p->control->left){
+            p->direcao=0;
+            player_move(p, 1, 0, max_x, max_y);
+            if(colision_left(p,&rooms[p->room_id],max_x,max_y))
+                p->x = ((int)(p->x - p->side/2) / (max_x/ROOM_COLS) + 1) * (max_x/ROOM_COLS) + p->side/2;
+        }
+        if (p->control->right){
+            p->direcao=1;
+            player_move(p, 1, 1, max_x, max_y);
+            if(colision_right(p,&rooms[p->room_id],max_x,max_y))
+                p->x = ((int)(p->x + p->side/2 - 1) / (max_x/ROOM_COLS)) * (max_x/ROOM_COLS) - p->side/2;
+        }
+
+        if(p->control->up && p->is_down){
+            p->gravity = -12.0f;
+            p->is_down = 0;
+        }
+
+        p->gravity += GRAVITY;
+        if(p->gravity > MAX_FALL) 
+            p->gravity = MAX_FALL;
+        p->y += p->gravity;
+        
+        if(colision_top(p,&rooms[p->room_id],max_x,max_y)){
+            p->y = ((int)(p->y - p->side/2) / (max_y/ROOM_ROWS) + 1) * (max_y/ROOM_ROWS) + p->side/2;
+            p->gravity = 3.0f;
+        }
+
+        if(colision_bottom(p,&rooms[p->room_id],max_x,max_y)){
+            p->y = ((int)(p->y + p->side/2) / (max_y/ROOM_ROWS)) * (max_y/ROOM_ROWS) - p->side/2;
+            p->gravity = 0;
+            p->is_down = 1;
+        } else {
+            p->is_down = 0;
+        }
+
+        if (p->x - p->side/2 <= 0){
+            p->room_id = rooms[p->room_id].left_id;
+            p->x = max_x - p->side;
+        }
+
+        if (p->x + p->side/2 >= max_x){ //vai para a direita
+            p->room_id = rooms[p->room_id].right_id;
+            p->x = p->side;
+        }
     }
 
-	if(colision_bottom(p,&rooms[p->room_id],max_x,max_y)){
-        p->y = ((int)(p->y + p->side/2) / (max_y/ROOM_ROWS)) * (max_y/ROOM_ROWS) - p->side/2;
-        p->gravity = 0;
-        p->is_down = 1;
-    } else {
-        p->is_down = 0;
+    if (!p->is_down){
+        p->anim_state = PULANDO;
+        p->anim_velocity = 7;
+        if(p->gravity > 0 ){
+        if (p->anim_frame >= anim_num_frames(PULANDO) - 3)
+            return;
+        }
     }
 
-    if (p->x - p->side/2 <= 0){
-        p->room_id = rooms[p->room_id].left_id;
-        p->x = max_x - p->side;
+    else if (p->control->down){
+		p->anim_state= DOWN;
+        p->anim_velocity=10;
+        if (p->anim_frame >= anim_num_frames(DOWN) - 1){
+            p->anim_frame = anim_num_frames(DOWN) - 1;
+            return;
+        }
     }
+    
+    else if (!p->control->left && !p->control->right){
+        p->anim_state = IDLE;
+        p->anim_velocity=25;
+    }
+    else{
+        p->anim_state = CORRENDO;
+        p->anim_velocity = 5;
+    } 
 
-    if (p->x + p->side/2 >= max_x){ //vai para a direita
-        p->room_id = rooms[p->room_id].right_id;
-        p->x = p->side;
-    }
-    //terminar bomba de animação
-    p->anim_timer++;
-    if (p->anim_timer >= 15) {
+
+    if (prev_state != p->anim_state){
         p->anim_timer = 0;
-        p->anim_frame = (p->anim_frame + 1) % 2;
+        p->anim_frame = 0;
+    }   
+
+
+    p->anim_timer++;
+    if (p->anim_timer >= p->anim_velocity) { // velocidade da anim
+        p->anim_timer = 0;
+        p->anim_frame = (p->anim_frame+1) % anim_num_frames(p->anim_state);
     }
 
 }

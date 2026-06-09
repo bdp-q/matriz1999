@@ -12,7 +12,7 @@
 #define GAME_H 480
 #define FRAME_W 48
 #define FRAME_H 48
-#define PLAYER_SCALE 1
+#define PLAYER_SCALE 1.12
 
 int main(){
 	//inicializações da allegro
@@ -44,14 +44,18 @@ int main(){
 	al_translate_transform(&transform, offset_x, offset_y);
 
 	ALLEGRO_BITMAP* tile_sprites[6];
-	tile_sprites[TILE_BACK] = al_load_bitmap("Assets/background.png");	   // gaveta 0: vazio, sem sprite
+	tile_sprites[TILE_BACK] = al_load_bitmap("Assets/teste3.png");
 	tile_sprites[TILE_WALL]  = al_load_bitmap("Assets/parede.png");    // gaveta 1
 	tile_sprites[TILE_FLOOR1] = al_load_bitmap("Assets/chao.png");     // gaveta 2
 	tile_sprites[TILE_FLOOR2] = al_load_bitmap("Assets/chao3.png");    // gaveta 2
-	//tile_sprites[TILE_SPIKE] = al_load_bitmap("assets/espinho.png"); // gaveta 3
+	tile_sprites[TILE_SPIKE] = al_load_bitmap("Assets/spike.png"); // gaveta 3
 	tile_sprites[TILE_EMPTY] = al_load_bitmap("Assets/back3.png");
 
-	ALLEGRO_BITMAP* player_sprite = al_load_bitmap("Assets/player/player_idle.png");
+	ALLEGRO_BITMAP* anim_sheets[4]; // um por estado
+	anim_sheets[IDLE] = al_load_bitmap("Assets/player/player_idle.png");
+	anim_sheets[CORRENDO]= al_load_bitmap("Assets/player/player_run.png");	
+	anim_sheets[PULANDO]= al_load_bitmap("Assets/player/player_jump.png");	
+	anim_sheets[DOWN]= al_load_bitmap("Assets/player/player_down.png");
 	
 	// indica que eventos de teclado, tela e tempo vão ativar nossa fila de eventos
 	al_register_event_source(queue, al_get_keyboard_event_source());
@@ -60,7 +64,7 @@ int main(){
 
 	room rooms[] = {room0,room1,room2};
 
-	player* player = player_create(GAME_W/40, GAME_W/2, GAME_H/2, GAME_W, GAME_H,10);
+	player* player = player_create(GAME_W/35, GAME_W/2, GAME_H/2, GAME_W, GAME_H,10);
 	if (!player) return 1;	
 
 	float tile_w = GAME_W / ROOM_COLS;
@@ -88,7 +92,7 @@ int main(){
 			
 			int flip = (player->direcao == 0) ? ALLEGRO_FLIP_HORIZONTAL : 0;
 			ALLEGRO_BITMAP* frame = al_create_sub_bitmap(
-			player_sprite,
+			anim_sheets[player->anim_state],
 			player->anim_frame * FRAME_W, 0,  // avança 8px por frame
 			FRAME_W, FRAME_H
 			);
@@ -99,12 +103,11 @@ int main(){
 			0, 0,
 			FRAME_W, FRAME_H,
 			player->x - (player->side * PLAYER_SCALE) / 2,  // centraliza na posição do player
-			player->y - (player->side * PLAYER_SCALE) / 2,
+			player->y - (player->side * PLAYER_SCALE) / 2 - 1, // -1 frame pra centralizar de volta o jogador
 			player->side * PLAYER_SCALE,
 			player->side * PLAYER_SCALE,
 			flip
 			);
-
 			al_destroy_bitmap(frame); 
 			al_flip_display();
 		}
@@ -116,23 +119,25 @@ int main(){
 					player->gravity *= 0.5;
 			}
 
+			else if(event.keyboard.keycode == ALLEGRO_KEY_S || event.keyboard.keycode == ALLEGRO_KEY_DOWN){
+				joystick_down(player->control);
+			}
 			else if(event.keyboard.keycode == ALLEGRO_KEY_A || event.keyboard.keycode == ALLEGRO_KEY_LEFT) //movimento pra esquerda (a ou setinha)
 				joystick_left(player->control);
 			
 			else if(event.keyboard.keycode == ALLEGRO_KEY_D || event.keyboard.keycode == ALLEGRO_KEY_RIGHT) //movimento pra direita (d ou setinha)
 				joystick_right(player->control);
 			
-			
+
 			
 		}
 		else if (event.type == 42) break;	//Evento de clique no "X" de fechamento da tela
-	
 	}
 
 	//funções destrutoras para limpar a casa antes do programa acabar
 	al_destroy_bitmap(tile_sprites[TILE_WALL]);
 	al_destroy_bitmap(tile_sprites[TILE_FLOOR1]);
-	al_destroy_bitmap(player_sprite);
+	al_destroy_bitmap(*tile_sprites);
 	player_destroy(player);
 	al_destroy_font(font);															
 	al_destroy_display(disp);														

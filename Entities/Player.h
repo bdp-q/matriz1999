@@ -3,7 +3,11 @@
 
 #include "Joystick.h"			//onde fica o movimento do jogador																										
 #include "Rooms/Room.h"
-#define PLAYER_STEP 10			//Tamanho, em pixels, de um passo do jogador (movimento)
+#define PLAYER_STEP 7			//Tamanho, em pixels, de um passo do jogador (movimento)
+#define IDLE 0
+#define CORRENDO 1
+#define PULANDO 2
+#define DOWN 3
 
 typedef struct {		
 	unsigned char side;			//Tamanmho da lateral da hitbox do jogador
@@ -18,6 +22,8 @@ typedef struct {
 	int direcao;				//direção que o jogador esta olhando: 1 direita 0 esquerda
 	int anim_frame;				//em que ponto da animacao estamos
 	int anim_timer;				// a quanto tempo ela ta la
+	int anim_state;				//qual animação ele esta
+	int anim_velocity;			//qual a velocidade dessa animação
 
 } player;						//Struct do jogador
 
