@@ -2,7 +2,8 @@
 #include <allegro5/allegro5.h>													
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
-#include <allegro5/allegro_image.h>														
+#include <allegro5/allegro_image.h>	
+#include <string.h>													
 #include "Player.h"
 #include "Rooms/Room.h"
 #include "Rooms/Rooms.h"
@@ -18,6 +19,7 @@ int main(){
 	//inicializações da allegro
 	al_init();																		
 	al_install_keyboard();																		
+	al_init_font_addon();
 	al_init_primitives_addon();	
 
     al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW); // deixa a tela fullscreen
@@ -56,11 +58,12 @@ int main(){
 	anim_sheets[CORRENDO]= al_load_bitmap("Assets/player/player_run.png");	
 	anim_sheets[PULANDO]= al_load_bitmap("Assets/player/player_jump.png");	
 	anim_sheets[DOWN]= al_load_bitmap("Assets/player/player_down.png");
-	
+
 	// indica que eventos de teclado, tela e tempo vão ativar nossa fila de eventos
 	al_register_event_source(queue, al_get_keyboard_event_source());
 	al_register_event_source(queue, al_get_display_event_source(disp));
 	al_register_event_source(queue, al_get_timer_event_source(timer));
+
 
 	room rooms[] = {room0,room1,room2};
 
@@ -71,6 +74,11 @@ int main(){
 	float tile_h = GAME_H / ROOM_ROWS;
 
 	ALLEGRO_EVENT event;
+
+	int frames = 0;
+    int tempo_restante = 60;
+    char texto_timer[10]; 
+    
 	al_start_timer(timer);
 
 	//laço principal do nosso programa															
@@ -78,6 +86,18 @@ int main(){
 		al_wait_for_event(queue, &event); //func que observa e coloca eventos na fila (os que falamos que é pra ativar)	
 		//eventos de relogio: o que precisa acontecer a cada frame
 		if (event.type == 30){
+
+			frames++;
+			if(frames >= 30){
+				if(tempo_restante > 0)
+					tempo_restante--;
+				frames = 0;	
+			}
+
+			if (tempo_restante == 0)
+				break;
+			sprintf(texto_timer, "%d", tempo_restante);
+
 			//calcula a gravidade
 			player_update(player,rooms, GAME_W, GAME_H);
 			//pinta a tela e os personagens
@@ -109,6 +129,7 @@ int main(){
 			flip
 			);
 			al_destroy_bitmap(frame); 
+			al_draw_text(font, al_map_rgb(255, 255, 255), 550, 50, 0, texto_timer);
 			al_flip_display();
 		}
 		else if((event.type == 10) || (event.type == 12)){	//eventos de teclado 
