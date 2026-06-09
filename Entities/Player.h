@@ -14,6 +14,7 @@ typedef struct {
 	unsigned short x;			//Posição X 
 	unsigned short y;			//Posição Y do centro do jogador
 	unsigned char hp;
+	char is_damaged;
 	char is_down;				//diz se o jogador esta tocando em algo no chão
 	float gravity;				//velocidade puxando ele pra baixo
 	joystick *control;			// movimento dele fica nessa struct	

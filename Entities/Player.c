@@ -37,8 +37,10 @@ void player_move(player *p, char steps, unsigned char trajectory, unsigned short
 		p->x = p->x + steps*PLAYER_STEP; //direita
 	}
 }
-static inline int tile_has_collision(int tile) {
-    return tile == TILE_WALL || tile == TILE_FLOOR1 || tile == TILE_FLOOR2;
+int tile_has_collision(player *p, int tile) {
+    if(tile == TILE_SPIKE)
+        p->is_damaged=1;    
+    return  tile == TILE_WALL || tile == TILE_FLOOR1 || tile == TILE_FLOOR2;
 }
 
 int colision_left(player *p, room *r, unsigned short x_screen, unsigned short y_screen){
@@ -48,8 +50,8 @@ int colision_left(player *p, room *r, unsigned short x_screen, unsigned short y_
     int row_top  = (int)(p->y - p->side/2) / tile_h;
     int row_bot  = (int)(p->y + p->side/2 - 1) / tile_h;
 
-    return tile_has_collision(r->tiles[row_top][col]) ||
-           tile_has_collision(r->tiles[row_bot][col]);
+    return tile_has_collision(p,r->tiles[row_top][col]) ||
+           tile_has_collision(p,r->tiles[row_bot][col]);
 }
 
 int colision_right(player *p, room *r, unsigned short x_screen, unsigned short y_screen){
@@ -60,8 +62,8 @@ int colision_right(player *p, room *r, unsigned short x_screen, unsigned short y
     int row_bot  = (int)(p->y + p->side/2 - 1) / tile_h;
     
     
-    return tile_has_collision(r->tiles[row_top][col]) ||
-           tile_has_collision(r->tiles[row_bot][col]);
+    return tile_has_collision(p,r->tiles[row_top][col]) ||
+           tile_has_collision(p,r->tiles[row_bot][col]);
 }
 
 int colision_bottom(player *p, room *r, unsigned short x_screen, unsigned short y_screen){
@@ -71,8 +73,8 @@ int colision_bottom(player *p, room *r, unsigned short x_screen, unsigned short 
     int col_left = (int)(p->x - p->side/2) / tile_w;
     int col_right= (int)(p->x + p->side/2 - 1) / tile_w;
 
-    return tile_has_collision(r->tiles[row][col_left]) ||
-           tile_has_collision(r->tiles[row][col_right]);
+    return tile_has_collision(p,r->tiles[row][col_left]) ||
+           tile_has_collision(p,r->tiles[row][col_right]);
 }
 
 int colision_top(player *p, room *r, unsigned short x_screen, unsigned short y_screen){
@@ -81,9 +83,9 @@ int colision_top(player *p, room *r, unsigned short x_screen, unsigned short y_s
     int row      = (int)(p->y - p->side/2) / tile_h;
     int col_left = (int)(p->x - p->side/2) / tile_w;
     int col_right= (int)(p->x + p->side/2 - 1) / tile_w;
-
-    return tile_has_collision(r->tiles[row][col_left]) ||
-           tile_has_collision(r->tiles[row][col_right]);
+    
+    return tile_has_collision(p,r->tiles[row][col_left]) ||
+           tile_has_collision(p,r->tiles[row][col_right]);
 }
 
 static int anim_num_frames(int state){
@@ -136,6 +138,11 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
             p->is_down = 0;
         }
 
+        if (p->is_damaged){
+            p->x = 100;
+            p->y = 100;
+            p->is_damaged = 0;
+        }
         if (p->x - p->side/2 <= 0){
             p->room_id = rooms[p->room_id].left_id;
             p->x = max_x - p->side;

@@ -11,11 +11,12 @@ void room_draw(room *r,float tile_w, float tile_h, ALLEGRO_BITMAP* tile_sprites[
 
             ALLEGRO_BITMAP* sprite = tile_sprites[tipo];
 
-            if (tile_sprites[TILE_EMPTY]) {
-                al_draw_scaled_bitmap(tile_sprites[TILE_EMPTY],
+        /**/
+            if (tile_sprites[TILE_BACK]) {
+                al_draw_scaled_bitmap(tile_sprites[TILE_BACK],
                     0, 0,
-                    al_get_bitmap_width(tile_sprites[TILE_EMPTY]),
-                    al_get_bitmap_height(tile_sprites[TILE_EMPTY]),
+                    al_get_bitmap_width(tile_sprites[TILE_BACK]),
+                    al_get_bitmap_height(tile_sprites[TILE_BACK]),
                     x, y, tile_w, tile_h, 0);
             }
             if (sprite) {
