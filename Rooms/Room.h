@@ -1,6 +1,7 @@
 #ifndef __ROOM__
 #define __ROOM__
 #include <allegro5/allegro.h>
+#include "Spike.h"
 
 #define TILE_BACK  0
 #define TILE_WALL   1
@@ -18,9 +19,12 @@ typedef struct {
     int left_id;
     int top_id;
     int bottom_id;
+    spike spikes[64];
+    int   spike_count;
 } room;
 
 void room_draw(room *r,float tile_w, float tile_h,ALLEGRO_BITMAP* tile_sprites[]);
 
+void room_build_obstacles(room *r, float tile_w, float tile_h);
 
 #endif

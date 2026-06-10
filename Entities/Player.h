@@ -3,6 +3,7 @@
 
 #include "Joystick.h"			//onde fica o movimento do jogador																										
 #include "Rooms/Room.h"
+#include "Hitbox.h"
 #define PLAYER_STEP 7			//Tamanho, em pixels, de um passo do jogador (movimento)
 #define IDLE 0
 #define CORRENDO 1

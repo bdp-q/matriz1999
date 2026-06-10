@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "Player.h"
+#include "Hitbox.h"
 #include "Rooms/Room.h"
 #include<stdio.h>
 #define GRAVITY 1.0f
@@ -37,9 +38,18 @@ void player_move(player *p, char steps, unsigned char trajectory, unsigned short
 		p->x = p->x + steps*PLAYER_STEP; //direita
 	}
 }
-int tile_has_collision(player *p, int tile) {
-    if(tile == TILE_SPIKE)
-        p->is_damaged=1;    
+
+void check_spike_damage(player *p, room *r) {
+    hitbox ph = { p->x, p->y, p->side * 0.5f, p->side * 0.5f };
+    for (int i = 0; i < r->spike_count; i++) {
+        if (hitbox_collide(&ph, &r->spikes[i].hb)) {
+            p->is_damaged = 1;
+            break;
+        }
+    }
+}
+
+int tile_has_collision(player *p, int tile) {  
     return  tile == TILE_WALL || tile == TILE_FLOOR1 || tile == TILE_FLOOR2;
 }
 
@@ -101,6 +111,7 @@ static int anim_num_frames(int state){
 void player_update(player *p, room rooms[], unsigned short max_x, unsigned short max_y){
     int prev_state = p->anim_state;
     
+    check_spike_damage(p,&rooms[p->room_id]);
     if(!p->control->down || !p->is_down){
         if (p->control->left){
             p->direcao=0;

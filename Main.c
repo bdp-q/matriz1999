@@ -73,6 +73,9 @@ int main(){
 	float tile_w = GAME_W / ROOM_COLS;
 	float tile_h = GAME_H / ROOM_ROWS;
 
+	for (int i = 0; i < 3; i++)
+		room_build_obstacles(&rooms[i],tile_w,tile_h);
+
 	ALLEGRO_EVENT event;
 
 	int frames = 0;
