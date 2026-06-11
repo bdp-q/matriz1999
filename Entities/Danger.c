@@ -79,8 +79,13 @@ bullet bullet_build(bullet_spawner *s, unsigned short target_x, unsigned short t
     return b;
 }
 
-void bullet_update(bullet *b) {
+void bullet_update(bullet *b, int is_down) {
     if (!b->active) return;
+    if(is_down){
+        b->x += 0.2*b->vx;
+        b->y += 0.2*b->vy;
+        return;
+    }
     b->x += b->vx;
     b->y += b->vy;
 }

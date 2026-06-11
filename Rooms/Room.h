@@ -14,7 +14,7 @@
 #define TILE_AIR_SPIKE 8
 #define TILE_MOVING_SPIKE 9
 #define TILE_RED_PILL 10
-
+ 
 #define ROOM_ROWS   30
 #define ROOM_COLS   40
 
@@ -51,5 +51,5 @@ void room_draw(room *r,float tile_w, float tile_h,ALLEGRO_BITMAP* tile_sprites[]
 
 void room_build_obstacles(room *r, float tile_w, float tile_h);
 
-void room_update(room *r, unsigned player_x, unsigned short player_y, float tile_w, float tile_h);
+void room_update(room *r, unsigned player_x, unsigned short player_y, float tile_w, float tile_h,int is_down);
 #endif

@@ -11,10 +11,10 @@
 
 #define GAME_W 640
 #define GAME_H 480
-#define FRAME_W 48
+#define FRAME_W 48 
 #define FRAME_H 48
 #define PLAYER_SCALE 1.12
-#define TEMPO_VIDA 120
+#define TEMPO_VIDA 20
 
 int main(){
 	//inicializações da allegro
@@ -47,42 +47,43 @@ int main(){
 	al_translate_transform(&transform, offset_x, offset_y);
 
 
-	ALLEGRO_BITMAP* game_over = al_load_bitmap("Assets/game_over.png") ;
-	ALLEGRO_BITMAP* game_menu = al_load_bitmap("Assets/menu_inicial.png") ;
+	ALLEGRO_BITMAP* game_over = al_load_bitmap("Assets/Menus/game_over.png") ;
+	ALLEGRO_BITMAP* game_menu = al_load_bitmap("Assets/Menus/menu_inicial.png") ;
 
 	ALLEGRO_BITMAP* tile_sprites[11];
-	tile_sprites[TILE_BACK] = al_load_bitmap("Assets/teste3.png");
-	tile_sprites[TILE_WALL]  = al_load_bitmap("Assets/a.png");
-	tile_sprites[TILE_FLOOR1] = al_load_bitmap("Assets/chao.png"); 
+	tile_sprites[TILE_BACK] = al_load_bitmap("Assets/Props/background.png");
+	tile_sprites[TILE_WALL]  = al_load_bitmap("Assets/Props/parede.png"); 
+	tile_sprites[TILE_FLOOR1] = al_load_bitmap("Assets/Props/chao.png"); 
 	tile_sprites[TILE_FLOOR2] = al_load_bitmap("Assets/chao3.png");
-	tile_sprites[TILE_SPIKE] = al_load_bitmap("Assets/spike.png"); 
-	tile_sprites[TILE_EMPTY] = al_load_bitmap("Assets/empty.png");
-	tile_sprites[TILE_LASER] = NULL;
-	tile_sprites[TILE_AIR_SPIKE] = al_load_bitmap("Assets/air_spike.png");
-	tile_sprites[TILE_MOVING_SPIKE] = al_load_bitmap("Assets/moving_spike.png");
-	tile_sprites[TILE_RED_PILL] = al_load_bitmap("Assets/red_pill.png");
+	tile_sprites[TILE_SPIKE] = al_load_bitmap("Assets/Hazards/spike.png"); 
+	tile_sprites[TILE_EMPTY] = al_load_bitmap("Assets/Props/empty.png");
+	tile_sprites[TILE_LASER] = al_load_bitmap("Assets/Hazards/laser.png");
+	tile_sprites[TILE_SHOOTER] = al_load_bitmap("Assets/Hazards/shooter.png");
+	tile_sprites[TILE_AIR_SPIKE] = al_load_bitmap("Assets/Hazards/air_spike.png");
+	tile_sprites[TILE_MOVING_SPIKE] = al_load_bitmap("Assets/Hazards/moving_spike.png");
+	tile_sprites[TILE_RED_PILL] = al_load_bitmap("Assets/Props/red_pill.png");
 
 	ALLEGRO_BITMAP* anim_sheets[5]; // um por estado
-	anim_sheets[IDLE] = al_load_bitmap("Assets/player/player_idle.png");
-	anim_sheets[CORRENDO]= al_load_bitmap("Assets/player/player_run.png");	
-	anim_sheets[PULANDO]= al_load_bitmap("Assets/player/player_jump.png");	
-	anim_sheets[DOWN]= al_load_bitmap("Assets/player/player_down.png");
-	anim_sheets[ACAO]= al_load_bitmap("Assets/player/player_action.png");
+	anim_sheets[IDLE] = al_load_bitmap("Assets/Player/player_idle.png");
+	anim_sheets[CORRENDO]= al_load_bitmap("Assets/Player/player_run.png");	
+	anim_sheets[PULANDO]= al_load_bitmap("Assets/Player/player_jump.png");	
+	anim_sheets[DOWN]= al_load_bitmap("Assets/Player/player_down.png");
+	anim_sheets[ACAO]= al_load_bitmap("Assets/Player/player_action.png");
 	// indica que eventos de teclado, tela e tempo vão ativar nossa fila de eventos
 	al_register_event_source(queue, al_get_keyboard_event_source());
 	al_register_event_source(queue, al_get_display_event_source(disp));
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 
 
-	room rooms[] = {room0,room1,room2};
+	room rooms[] = {room0,room1,room2,room3}; 
 
-	player* player = player_create(GAME_W/35, GAME_W/2, GAME_H/2, GAME_W, GAME_H,10);
+	player* player = player_create(GAME_W/35, 100, 49, GAME_W, GAME_H,10);
 	if (!player) return 1;	
 
 	float tile_w = GAME_W / ROOM_COLS;
 	float tile_h = GAME_H / ROOM_ROWS;
-
-	for (int i = 0; i < 3; i++)
+ 
+	for (int i = 0; i < 4; i++)
 		room_build_obstacles(&rooms[i],tile_w,tile_h);
 
 	ALLEGRO_EVENT event= {0};
@@ -125,15 +126,16 @@ int main(){
 					game_start = 0;	
 					death = 1;
 					tempo_restante = TEMPO_VIDA;
-					player->x = GAME_W/2;
-					player->y = GAME_H/2;	
+					player->x = 100;
+					player->y = 49 ; 	   
+					player->room_id = 0;
 				}
 				sprintf(texto_timer, "%d", tempo_restante);
 
 				//calcula a gravidade
 				player_update(player,rooms, GAME_W, GAME_H, &tempo_restante);
 
-				room_update(&rooms[player->room_id],player->x, player->y,tile_w, tile_h);
+				room_update(&rooms[player->room_id],player->x, player->y,tile_w, tile_h,player->control->down);
 			
 				//pinta a tela e os personagens
 				room_draw(&rooms[player->room_id],tile_w,tile_h,tile_sprites);	

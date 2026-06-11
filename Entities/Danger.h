@@ -7,8 +7,8 @@
 #define SPIKE_HITBOX_TOP 0.2f
 
 typedef struct {
-    unsigned short x;
-    unsigned short y;     // posição do centro
+    float x;
+    float y;     // posição do centro
     float hw;
     float hh;   // meia largura/altura (hitbox)
     float vx;
@@ -48,6 +48,6 @@ hitbox laser_build(int row, int col, int length, float tile_w, float tile_h);
 
 bullet bullet_build(bullet_spawner *s, unsigned short target_x, unsigned short target_y, float speed);
 
-void bullet_update(bullet *b);
+void bullet_update(bullet *b, int is_down);
 
 #endif

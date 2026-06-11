@@ -40,6 +40,52 @@ void player_move(player *p, char steps, unsigned char trajectory, unsigned short
 	}
 }
 
+void check_damage(player *p, room *r){
+    hitbox ph = { p->x, p->y, p->side * 0.5f, p->side * 0.5f };
+
+    //checa espinho
+    for (int i = 0; i < r->spike_count; i++) {
+        if (hitbox_collide(&ph, &r->spikes[i])) {
+            p->is_damaged = 1;
+            break;
+        }
+    }
+    //checa o laser
+    for (int i = 0; i < r->laser_count; i++) {
+        if (hitbox_collide(&ph, &r->lasers[i]) && r->lasers_on) {
+            p->is_damaged = 1;
+            break;
+        }
+    }
+    //checa o spike air
+    for (int i = 0; i < r->air_spikes_count; i++) {
+        if (hitbox_collide(&ph, &r->air_spikes[i].hb)) {
+            p->is_damaged = 1;
+            break;
+        }
+    }
+    //checa as balas
+    for (int i = 0; i < r->bullet_count; i++) {
+        bullet *b = &r->bullets[i];
+        if (b->active){
+            hitbox bh = {b->x,b->y,b->hw, b->hh};
+            if (hitbox_collide(&ph, &bh)) {
+                p->is_damaged = 1;
+                b->active = 0;  // tiro some ao acertar
+                break;
+            }
+        }
+    }
+
+    //checa o moving spike
+    for (int i = 0; i < r->moving_spikes_count; i++) {
+        if (hitbox_collide(&ph, &r->moving_spikes[i].hb)) {
+            p->is_damaged = 1;
+            break;
+        }
+    }
+}
+
 void check_spike_damage(player *p, room *r) {
     hitbox ph = { p->x, p->y, p->side * 0.5f, p->side * 0.5f };
     for (int i = 0; i < r->spike_count; i++) {
@@ -48,6 +94,7 @@ void check_spike_damage(player *p, room *r) {
             break;
         }
     }
+    
 }
 
 void check_laser_damage(player *p, room *r) {
@@ -155,10 +202,6 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
         p->in_action=0;
 
     check_damage(p,&rooms[p->room_id]);
-    check_laser_damage(p,&rooms[p->room_id]);
-    check_bullet_damage(p, &rooms[p->room_id]);
-    check_air_spike_damage(p,&rooms[p->room_id]);
-    check_air_spike_damage(p,&rooms[p->room_id]);
 
     if (p->y > max_y)
         p->is_damaged = 1;
@@ -202,12 +245,6 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
             p->is_down = 0;
         }
 
-        if (p->is_damaged){
-            *tempo = *tempo - 5;
-            p->x = 100;
-            p->y = 100;
-            p->is_damaged = 0;
-        }
         if (p->x - p->side/2 <= 0){
             p->room_id = rooms[p->room_id].left_id;
             p->x = max_x - p->side;
@@ -219,6 +256,13 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
         }
     }
 
+    if (p->is_damaged){
+        *tempo = *tempo - 5;
+        p->x = 100;
+        p->y = 49;
+        p->is_damaged = 0;
+        p->gravity=0;
+    }
     
     if (!p->is_down){
         p->anim.state = PULANDO;

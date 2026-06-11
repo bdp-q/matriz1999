@@ -3,6 +3,8 @@
 #include <allegro5/allegro_primitives.h>
 
 void room_draw(room *r,float tile_w, float tile_h, ALLEGRO_BITMAP* tile_sprites[]) {
+    al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
+
     for (int row = 0; row < ROOM_ROWS; row++) {
         for (int col = 0; col < ROOM_COLS; col++) {
             int tipo = r->tiles[row][col];
@@ -40,13 +42,14 @@ void room_draw(room *r,float tile_w, float tile_h, ALLEGRO_BITMAP* tile_sprites[
     if (r->lasers_on) {
         for(int i = 0; i < r->laser_count; i++) {
             hitbox l = r->lasers[i];
-            al_draw_filled_rectangle(l.x - l.hw, l.y - l.hh, l.x + l.hw, l.y + l.hh, al_map_rgb(255, 0, 0));
+
+            al_draw_filled_rectangle(l.x - l.hw, l.y - l.hh, l.x + l.hw, l.y + l.hh, al_premul_rgba_f(0.0, 1.0, 0.0, 0.7) );
         }
     }
     for (int i = 0; i < r->bullet_count; i++) {
         bullet *b = &r->bullets[i];
         if (b->active)
-            al_draw_filled_circle(b->x, b->y, b->hw, al_map_rgb(255, 165, 0));
+            al_draw_filled_circle(b->x, b->y, b->hw, al_map_rgb(0, 255, 65));
     }
     for (int i = 0; i < r->air_spikes_count; i++) {
         air_spike *as = &r->air_spikes[i];
@@ -118,7 +121,7 @@ void room_build_obstacles(room *r, float tile_w, float tile_h) {
     }
 }
 
-void room_update(room *r, unsigned player_x, unsigned short player_y, float tile_w, float tile_h){
+void room_update(room *r, unsigned player_x, unsigned short player_y, float tile_w, float tile_h, int is_down){
     float screen_w = tile_w * ROOM_COLS;
     float screen_h = tile_h * ROOM_ROWS;
 
@@ -145,7 +148,7 @@ void room_update(room *r, unsigned player_x, unsigned short player_y, float tile
     for (int i = 0; i < r->bullet_count; i++) {
         bullet *b = &r->bullets[i];
         if (b->active){
-            bullet_update(b);
+            bullet_update(b,is_down);
             if (b->x < 0 || b->x > screen_w || b->y < 0 || b->y > screen_h)
                 b->active = 0;
         }
