@@ -128,15 +128,18 @@ int main(){
 					death = 1;
 					tempo_restante = TEMPO_VIDA;
 					player->x = GAME_W/2;
-					player->y = GAME_H/2;
+					player->y = GAME_H/2;	
 				}
 				sprintf(texto_timer, "%d", tempo_restante);
 
 				//calcula a gravidade
 				player_update(player,rooms, GAME_W, GAME_H);
+
+				room_update_bullets(&rooms[player->room_id],player->x, player->y,tile_w, tile_h);
+			
 				//pinta a tela e os personagens
-				room_draw(&rooms[player->room_id],tile_w,tile_h,tile_sprites);
-				
+				room_draw(&rooms[player->room_id],tile_w,tile_h,tile_sprites);	
+			
 				int flip = (player->direcao == 0) ? ALLEGRO_FLIP_HORIZONTAL : 0;
 				ALLEGRO_BITMAP* frame = al_create_sub_bitmap(
 				anim_sheets[player->anim_state],

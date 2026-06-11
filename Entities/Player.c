@@ -59,6 +59,22 @@ void check_laser_damage(player *p, room *r) {
     }
 }
 
+void check_bullet_damage(player *p, room *r) {
+    hitbox ph = { p->x, p->y, p->side * 0.5f, p->side * 0.5f };
+    
+    for (int i = 0; i < r->bullet_count; i++) {
+        bullet *b = &r->bullets[i];
+        if (b->active){
+            hitbox bh = {b->x,b->y,b->hw, b->hh};
+            if (hitbox_collide(&ph, &bh)) {
+                p->is_damaged = 1;
+                b->active = 0;  // tiro some ao acertar
+                break;
+            }
+        }
+    }
+}
+
 int tile_has_collision(player *p, int tile) {  
     return  tile == TILE_WALL || tile == TILE_FLOOR1 || tile == TILE_FLOOR2;
 }
@@ -123,6 +139,7 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
     
     check_spike_damage(p,&rooms[p->room_id]);
     check_laser_damage(p,&rooms[p->room_id]);
+    check_bullet_damage(p, &rooms[p->room_id]);
     if (p->y > max_y)
         p->is_damaged = 1;
 

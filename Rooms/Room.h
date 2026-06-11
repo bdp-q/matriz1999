@@ -10,6 +10,7 @@
 #define TILE_SPIKE  4
 #define TILE_EMPTY 5
 #define TILE_LASER 6
+#define TILE_SHOOTER 7
 
 #define ROOM_ROWS   30
 #define ROOM_COLS   40
@@ -26,10 +27,15 @@ typedef struct {
     int lasers_on;
     int laser_timer;
     int  spike_count;
+    bullet_spawner spawners[16]; 
+    int spawner_count;
+    bullet bullets[128]; 
+    int bullet_count;
 } room;
 
 void room_draw(room *r,float tile_w, float tile_h,ALLEGRO_BITMAP* tile_sprites[]);
 
 void room_build_obstacles(room *r, float tile_w, float tile_h);
 
+void room_update_bullets(room *r, unsigned player_x, unsigned short player_y, float tile_w, float tile_h);
 #endif
