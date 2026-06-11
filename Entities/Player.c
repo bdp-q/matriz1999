@@ -148,15 +148,16 @@ static int anim_num_frames(int state){
 
 void player_update(player *p, room rooms[], unsigned short max_x, unsigned short max_y, int *tempo){
     int prev_state = p->anim.state;
-    int tile_w = max_x / ROOM_COLS;
+    int tile_w = max_x/ROOM_COLS;
     int tile_h = max_y / ROOM_ROWS;
-    int pill_col = (int)(p->x) / tile_w;
-    int pill_row = (int)(p->y + p->side / 2) / tile_h;
-    int on_pill = (rooms[p->room_id].tiles[pill_row][pill_col] == TILE_RED_PILL);
-    
-    check_spike_damage(p,&rooms[p->room_id]);
+
+    if(!(rooms[p->room_id].tiles[(int)(p->y + p->side / 2) / tile_h][(int)(p->x) / tile_w] == TILE_RED_PILL))
+        p->in_action=0;
+
+    check_damage(p,&rooms[p->room_id]);
     check_laser_damage(p,&rooms[p->room_id]);
     check_bullet_damage(p, &rooms[p->room_id]);
+    check_air_spike_damage(p,&rooms[p->room_id]);
     check_air_spike_damage(p,&rooms[p->room_id]);
 
     if (p->y > max_y)
@@ -169,13 +170,13 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
             p->direcao=0;
             player_move(p, 1, 0, max_x, max_y);
             if(colision_left(p,&rooms[p->room_id],max_x,max_y))
-                p->x = ((int)(p->x - p->side/2) / (max_x/ROOM_COLS) + 1) * (max_x/ROOM_COLS) + p->side/2;
+                p->x = ((int)(p->x - p->side/2) / (tile_w) + 1) * (tile_w) + p->side/2;
         }
         if (p->control->right){
             p->direcao=1;
             player_move(p, 1, 1, max_x, max_y);
             if(colision_right(p,&rooms[p->room_id],max_x,max_y))
-                p->x = ((int)(p->x + p->side/2 - 1) / (max_x/ROOM_COLS)) * (max_x/ROOM_COLS) - p->side/2;
+                p->x = ((int)(p->x + p->side/2 - 1) / (tile_w)) * (tile_w) - p->side/2;
         }
 
         if(p->control->up && p->is_down){
@@ -189,12 +190,12 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
         p->y += p->gravity;
         
         if(colision_top(p,&rooms[p->room_id],max_x,max_y)){
-            p->y = ((int)(p->y - p->side/2) / (max_y/ROOM_ROWS) + 1) * (max_y/ROOM_ROWS) + p->side/2;
+            p->y = ((int)(p->y - p->side/2) / (tile_h) + 1) * (tile_h) + p->side/2;
             p->gravity = 3.0f;
         }
 
         if(colision_bottom(p,&rooms[p->room_id],max_x,max_y)){
-            p->y = ((int)(p->y + p->side/2) / (max_y/ROOM_ROWS)) * (max_y/ROOM_ROWS) - p->side/2;
+            p->y = ((int)(p->y + p->side/2) / (tile_h)) * (tile_h) - p->side/2;
             p->gravity = 0;
             p->is_down = 1;
         } else {
@@ -241,13 +242,9 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
         p->anim.velocity = 30;
         if (p->anim.frame >= anim_num_frames(ACAO) -1 ){
             p->in_action=0;
+            rooms[p->room_id].tiles[(int)(p->y + p->side / 2) / tile_h][(int)(p->x) / tile_w] = TILE_BACK;
+            *tempo += 30;
         }
-        int tile_w = max_x / ROOM_COLS;
-        int tile_h = max_y / ROOM_ROWS;
-        int col = (int)(p->x) / tile_w;
-        int row = (int)(p->y + p->side / 2) / tile_h;
-        rooms[p->room_id].tiles[row][col] = TILE_BACK;
-        *tempo += 30;
         return;
     }
     

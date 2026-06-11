@@ -52,11 +52,11 @@ int main(){
 
 	ALLEGRO_BITMAP* tile_sprites[11];
 	tile_sprites[TILE_BACK] = al_load_bitmap("Assets/teste3.png");
-	tile_sprites[TILE_WALL]  = al_load_bitmap("Assets/parede.png");
+	tile_sprites[TILE_WALL]  = al_load_bitmap("Assets/a.png");
 	tile_sprites[TILE_FLOOR1] = al_load_bitmap("Assets/chao.png"); 
 	tile_sprites[TILE_FLOOR2] = al_load_bitmap("Assets/chao3.png");
 	tile_sprites[TILE_SPIKE] = al_load_bitmap("Assets/spike.png"); 
-	tile_sprites[TILE_EMPTY] = al_load_bitmap("Assets/back3.png");
+	tile_sprites[TILE_EMPTY] = al_load_bitmap("Assets/empty.png");
 	tile_sprites[TILE_LASER] = NULL;
 	tile_sprites[TILE_AIR_SPIKE] = al_load_bitmap("Assets/air_spike.png");
 	tile_sprites[TILE_MOVING_SPIKE] = al_load_bitmap("Assets/moving_spike.png");
