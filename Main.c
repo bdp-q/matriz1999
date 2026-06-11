@@ -13,8 +13,8 @@
 #define GAME_H 480
 #define FRAME_W 48 
 #define FRAME_H 48
-#define PLAYER_SCALE 1.12
-#define TEMPO_VIDA 20
+#define PLAYER_SCALE 1.12  
+#define TEMPO_VIDA 120   
 
 int main(){
 	//inicializações da allegro
@@ -218,6 +218,6 @@ int main(){
 	al_destroy_display(disp);														
 	al_destroy_timer(timer);														
 	al_destroy_event_queue(queue);													
-
+   
 	return 0;
 }

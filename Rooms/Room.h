@@ -28,7 +28,7 @@ typedef struct {
     hitbox spikes[64];
     int  spike_count;
 
-    air_spike air_spikes[64];
+    air_spike air_spikes[128];
     int air_spikes_count;
 
     moving_spike moving_spikes[64];
