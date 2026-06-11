@@ -8,7 +8,7 @@ LIBS    = $(shell pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_pri
 all: $(TARGET)
  
 $(TARGET): $(SRC)
-	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) $(LIBS)
+	$(CC) $(SRC) -g -o $(TARGET) $(CFLAGS) $(LIBS)
  
 clean:
 	rm -f $(TARGET)

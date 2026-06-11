@@ -13,6 +13,7 @@
 #define TILE_SHOOTER 7
 #define TILE_AIR_SPIKE 8
 #define TILE_MOVING_SPIKE 9
+#define TILE_RED_PILL 10
 
 #define ROOM_ROWS   30
 #define ROOM_COLS   40

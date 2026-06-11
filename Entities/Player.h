@@ -10,6 +10,7 @@
 #define CORRENDO 1
 #define PULANDO 2
 #define DOWN 3
+#define ACAO 4
 
 typedef struct {		
 	unsigned char side;			//Tamanmho da lateral da hitbox do jogador
@@ -18,6 +19,7 @@ typedef struct {
 	unsigned char hp;
 	char is_damaged;
 	char is_down;				//diz se o jogador esta tocando em algo no chão
+	char in_action;
 	float gravity;				//velocidade puxando ele pra baixo
 	joystick *control;			// movimento dele fica nessa struct	
 	int room_id;				//id do quarto que o player atualmente esta		
@@ -34,7 +36,7 @@ player* player_create(unsigned char side, unsigned short x, unsigned short y, un
 void player_move(player *p, char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y);
 
 //função que atualiza o jogador
-void player_update(player *p,room *r, unsigned short max_x, unsigned short max_y);
+void player_update(player *p,room *r, unsigned short max_x, unsigned short max_y, int *tempo);
 
 //função que libera a memória do jogador na hora do programa encerrar
 void player_destroy(player *p);

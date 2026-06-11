@@ -14,7 +14,7 @@
 #define FRAME_W 48
 #define FRAME_H 48
 #define PLAYER_SCALE 1.12
-#define TEMPO_VIDA 30
+#define TEMPO_VIDA 120
 
 int main(){
 	//inicializações da allegro
@@ -30,7 +30,7 @@ int main(){
 	ALLEGRO_FONT* font = al_create_builtin_font();			//Carrega uma fonte padrão para escrever na tela
 	ALLEGRO_DISPLAY* disp = al_create_display(640, 480);	//Cria uma janela padrão para o programa 
 	al_init_image_addon(); // precisa disso pra carregar imagens
-	
+
 	//pego o tamanho da sua tela fullscreen
 	int real_w = al_get_display_width(disp);
 	int real_h = al_get_display_height(disp);
@@ -50,7 +50,7 @@ int main(){
 	ALLEGRO_BITMAP* game_over = al_load_bitmap("Assets/game_over.png") ;
 	ALLEGRO_BITMAP* game_menu = al_load_bitmap("Assets/menu_inicial.png") ;
 
-	ALLEGRO_BITMAP* tile_sprites[10];
+	ALLEGRO_BITMAP* tile_sprites[11];
 	tile_sprites[TILE_BACK] = al_load_bitmap("Assets/teste3.png");
 	tile_sprites[TILE_WALL]  = al_load_bitmap("Assets/parede.png");
 	tile_sprites[TILE_FLOOR1] = al_load_bitmap("Assets/chao.png"); 
@@ -60,14 +60,14 @@ int main(){
 	tile_sprites[TILE_LASER] = NULL;
 	tile_sprites[TILE_AIR_SPIKE] = al_load_bitmap("Assets/air_spike.png");
 	tile_sprites[TILE_MOVING_SPIKE] = al_load_bitmap("Assets/moving_spike.png");
+	tile_sprites[TILE_RED_PILL] = al_load_bitmap("Assets/red_pill.png");
 
-
-	ALLEGRO_BITMAP* anim_sheets[4]; // um por estado
+	ALLEGRO_BITMAP* anim_sheets[5]; // um por estado
 	anim_sheets[IDLE] = al_load_bitmap("Assets/player/player_idle.png");
 	anim_sheets[CORRENDO]= al_load_bitmap("Assets/player/player_run.png");	
 	anim_sheets[PULANDO]= al_load_bitmap("Assets/player/player_jump.png");	
 	anim_sheets[DOWN]= al_load_bitmap("Assets/player/player_down.png");
-
+	anim_sheets[ACAO]= al_load_bitmap("Assets/player/player_action.png");
 	// indica que eventos de teclado, tela e tempo vão ativar nossa fila de eventos
 	al_register_event_source(queue, al_get_keyboard_event_source());
 	al_register_event_source(queue, al_get_display_event_source(disp));
@@ -85,7 +85,7 @@ int main(){
 	for (int i = 0; i < 3; i++)
 		room_build_obstacles(&rooms[i],tile_w,tile_h);
 
-	ALLEGRO_EVENT event;
+	ALLEGRO_EVENT event= {0};
 	int game_start = 0;
 	int death = 0;
 	int frames = 0;
@@ -131,7 +131,7 @@ int main(){
 				sprintf(texto_timer, "%d", tempo_restante);
 
 				//calcula a gravidade
-				player_update(player,rooms, GAME_W, GAME_H);
+				player_update(player,rooms, GAME_W, GAME_H, &tempo_restante);
 
 				room_update(&rooms[player->room_id],player->x, player->y,tile_w, tile_h);
 			
@@ -173,6 +173,11 @@ int main(){
 				game_start = 1;
 				death = 0;
 			}
+
+			else if(event.keyboard.keycode == ALLEGRO_KEY_E){
+				player->in_action=1;
+				player->anim.frame = -2;
+			}
 			else if(event.keyboard.keycode == ALLEGRO_KEY_S || event.keyboard.keycode == ALLEGRO_KEY_DOWN){
 				joystick_down(player->control);
 			}
@@ -181,15 +186,21 @@ int main(){
 			
 			else if(event.keyboard.keycode == ALLEGRO_KEY_D || event.keyboard.keycode == ALLEGRO_KEY_RIGHT) //movimento pra direita (d ou setinha)
 				joystick_right(player->control);
-			
+				
+			else if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE && !game_start) break;	
 		}
-		else if (event.type == 42 || (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE && !game_start)) break;	//Evento de clique no "X" de fechamento da tela
+		else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) break;
 	}
 
 	//funções destrutoras para limpar a casa antes do programa acabar
 	for (int i = 0; i < 10; i++)
     if (tile_sprites[i])
         al_destroy_bitmap(tile_sprites[i]);
+
+	for (int i = 0; i < 4; i++)
+    if (anim_sheets[i])
+        al_destroy_bitmap(anim_sheets[i]);
+		
 	al_destroy_bitmap(game_menu);
 	al_destroy_bitmap(game_over);
 	player_destroy(player);

@@ -25,7 +25,8 @@ player* player_create(unsigned char side, unsigned short x, unsigned short y, un
     new_player->anim.timer=0;
     new_player->direcao=1;	
     new_player->anim.state=IDLE;	
-    new_player->anim.velocity= 16;																					
+    new_player->anim.velocity= 16;	
+    new_player->in_action = 0;																				
 	return new_player;																															
 }
 
@@ -140,12 +141,18 @@ static int anim_num_frames(int state){
         case CORRENDO: return 6; 
         case PULANDO: return 4;
         case DOWN: return 4;
-//        case ACAO: return ?;
+        case ACAO: return 11;
+        default: return 1;
     }
 }
 
-void player_update(player *p, room rooms[], unsigned short max_x, unsigned short max_y){
+void player_update(player *p, room rooms[], unsigned short max_x, unsigned short max_y, int *tempo){
     int prev_state = p->anim.state;
+    int tile_w = max_x / ROOM_COLS;
+    int tile_h = max_y / ROOM_ROWS;
+    int pill_col = (int)(p->x) / tile_w;
+    int pill_row = (int)(p->y + p->side / 2) / tile_h;
+    int on_pill = (rooms[p->room_id].tiles[pill_row][pill_col] == TILE_RED_PILL);
     
     check_spike_damage(p,&rooms[p->room_id]);
     check_laser_damage(p,&rooms[p->room_id]);
@@ -154,8 +161,10 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
 
     if (p->y > max_y)
         p->is_damaged = 1;
+   // if(rooms[p->room_id].tiles[(int)(p->y + p->side/2) / max_y][(int)(p->y - p->side/2) / max_x] == TILE_RED_PILL)
+     //   rooms[p->room_id]->tiles[(int)(p->y + p->side/2) / max_y][(int)(p->y - p->side/2) / max_x] = NULL;
 
-    if(!p->control->down || !p->is_down){
+    if(!p->control->down || !p->is_down || p->in_action){
         if (p->control->left){
             p->direcao=0;
             player_move(p, 1, 0, max_x, max_y);
@@ -193,6 +202,7 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
         }
 
         if (p->is_damaged){
+            *tempo = *tempo - 5;
             p->x = 100;
             p->y = 100;
             p->is_damaged = 0;
@@ -208,6 +218,7 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
         }
     }
 
+    
     if (!p->is_down){
         p->anim.state = PULANDO;
         p->anim.velocity = 7;
@@ -224,6 +235,20 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
             p->anim.frame = anim_num_frames(DOWN) - 1;
             return;
         }
+    }
+    else if (p->in_action){
+        p->anim.state = ACAO;
+        p->anim.velocity = 30;
+        if (p->anim.frame >= anim_num_frames(ACAO) -1 ){
+            p->in_action=0;
+        }
+        int tile_w = max_x / ROOM_COLS;
+        int tile_h = max_y / ROOM_ROWS;
+        int col = (int)(p->x) / tile_w;
+        int row = (int)(p->y + p->side / 2) / tile_h;
+        rooms[p->room_id].tiles[row][col] = TILE_BACK;
+        *tempo += 30;
+        return;
     }
     
     else if (!p->control->left && !p->control->right){

@@ -78,7 +78,7 @@ void room_build_obstacles(room *r, float tile_w, float tile_h) {
     r->spike_count = 0;
     r->laser_count = 0;
     r->laser_timer = 0;
-    r->lasers_on = 1;
+    r->lasers_on = 0;
     r->spawner_count = 0;
     r->bullet_count  = 0;
     r->air_spikes_count = 0;
