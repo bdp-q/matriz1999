@@ -176,9 +176,17 @@ int main(){
 				death = 0;
 			}
 
-			else if(event.keyboard.keycode == ALLEGRO_KEY_E){
-				player->in_action=1;
-				player->anim.frame = -2;
+			else if(event.keyboard.keycode == ALLEGRO_KEY_E && event.type == 10){
+				int tile_w = GAME_W / ROOM_COLS;
+				int tile_h = GAME_H / ROOM_ROWS;
+				int col = (int)(player->x) / tile_w;
+				int row = (int)(player->y) / tile_h;
+
+				if(rooms[player->room_id].tiles[row][col] == TILE_RED_PILL){
+					player->in_action = 1;
+					player->anim.frame = 0;   // começa do frame 0, não -2
+					player->anim.timer = 0;
+				}
 			}
 			else if(event.keyboard.keycode == ALLEGRO_KEY_S || event.keyboard.keycode == ALLEGRO_KEY_DOWN){
 				joystick_down(player->control);

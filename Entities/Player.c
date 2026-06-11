@@ -86,53 +86,6 @@ void check_damage(player *p, room *r){
     }
 }
 
-void check_spike_damage(player *p, room *r) {
-    hitbox ph = { p->x, p->y, p->side * 0.5f, p->side * 0.5f };
-    for (int i = 0; i < r->spike_count; i++) {
-        if (hitbox_collide(&ph, &r->spikes[i])) {
-            p->is_damaged = 1;
-            break;
-        }
-    }
-    
-}
-
-void check_laser_damage(player *p, room *r) {
-    hitbox ph = { p->x, p->y, p->side * 0.5f, p->side * 0.5f };
-    for (int i = 0; i < r->laser_count; i++) {
-        if (hitbox_collide(&ph, &r->lasers[i]) && r->lasers_on) {
-            p->is_damaged = 1;
-            break;
-        }
-    }
-}
-
-void check_air_spike_damage(player *p, room *r) {
-    hitbox ph = { p->x, p->y, p->side * 0.5f, p->side * 0.5f };
-    for (int i = 0; i < r->air_spikes_count; i++) {
-        if (hitbox_collide(&ph, &r->air_spikes[i].hb)) {
-            p->is_damaged = 1;
-            break;
-        }
-    }
-}
-
-void check_bullet_damage(player *p, room *r) {
-    hitbox ph = { p->x, p->y, p->side * 0.5f, p->side * 0.5f };
-    
-    for (int i = 0; i < r->bullet_count; i++) {
-        bullet *b = &r->bullets[i];
-        if (b->active){
-            hitbox bh = {b->x,b->y,b->hw, b->hh};
-            if (hitbox_collide(&ph, &bh)) {
-                p->is_damaged = 1;
-                b->active = 0;  // tiro some ao acertar
-                break;
-            }
-        }
-    }
-}
-
 int tile_has_collision(player *p, int tile) {  
     return  tile == TILE_WALL || tile == TILE_FLOOR1 || tile == TILE_FLOOR2;
 }
@@ -198,17 +151,12 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
     int tile_w = max_x/ROOM_COLS;
     int tile_h = max_y / ROOM_ROWS;
 
-    if(!(rooms[p->room_id].tiles[(int)(p->y + p->side / 2) / tile_h][(int)(p->x) / tile_w] == TILE_RED_PILL))
-        p->in_action=0;
-
     check_damage(p,&rooms[p->room_id]);
 
     if (p->y > max_y)
         p->is_damaged = 1;
-   // if(rooms[p->room_id].tiles[(int)(p->y + p->side/2) / max_y][(int)(p->y - p->side/2) / max_x] == TILE_RED_PILL)
-     //   rooms[p->room_id]->tiles[(int)(p->y + p->side/2) / max_y][(int)(p->y - p->side/2) / max_x] = NULL;
 
-    if(!p->control->down || !p->is_down || p->in_action){
+    if(!p->in_action && (!p->control->down || !p->is_down)){
         if (p->control->left){
             p->direcao=0;
             player_move(p, 1, 0, max_x, max_y);
@@ -283,13 +231,15 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
     }
     else if (p->in_action){
         p->anim.state = ACAO;
-        p->anim.velocity = 30;
+        p->anim.velocity = 4;
         if (p->anim.frame >= anim_num_frames(ACAO) -1 ){
             p->in_action=0;
-            rooms[p->room_id].tiles[(int)(p->y + p->side / 2) / tile_h][(int)(p->x) / tile_w] = TILE_BACK;
+            rooms[p->room_id].tiles[(int)(p->y) / tile_h][(int)(p->x) / tile_w] = TILE_BACK;
             *tempo += 30;
+            p->in_action = 0;
+            p->anim.frame = 0;
+            p->anim.timer = 0;
         }
-        return;
     }
     
     else if (!p->control->left && !p->control->right){
