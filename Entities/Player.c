@@ -21,11 +21,11 @@ player* player_create(unsigned char side, unsigned short x, unsigned short y, un
 	new_player->hp = hp;
 	new_player->control = joystick_create();
     new_player->room_id = 0;
-    new_player->anim_frame=0;
-    new_player->anim_timer=0;
+    new_player->anim.frame=0;
+    new_player->anim.timer=0;
     new_player->direcao=1;	
-    new_player->anim_state=IDLE;	
-    new_player->anim_velocity= 16;																					
+    new_player->anim.state=IDLE;	
+    new_player->anim.velocity= 16;																					
 	return new_player;																															
 }
 
@@ -135,11 +135,12 @@ static int anim_num_frames(int state){
 }
 
 void player_update(player *p, room rooms[], unsigned short max_x, unsigned short max_y){
-    int prev_state = p->anim_state;
+    int prev_state = p->anim.state;
     
     check_spike_damage(p,&rooms[p->room_id]);
     check_laser_damage(p,&rooms[p->room_id]);
     check_bullet_damage(p, &rooms[p->room_id]);
+
     if (p->y > max_y)
         p->is_damaged = 1;
 
@@ -197,45 +198,39 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
     }
 
     if (!p->is_down){
-        p->anim_state = PULANDO;
-        p->anim_velocity = 7;
+        p->anim.state = PULANDO;
+        p->anim.velocity = 7;
         if(p->gravity > 0 ){
-        if (p->anim_frame >= anim_num_frames(PULANDO) - 3)
+        if (p->anim.frame >= anim_num_frames(PULANDO) - 3)
             return;
         }
     }
 
     else if (p->control->down){
-		p->anim_state= DOWN;
-        p->anim_velocity=10;
-        if (p->anim_frame >= anim_num_frames(DOWN) - 1){
-            p->anim_frame = anim_num_frames(DOWN) - 1;
+		p->anim.state= DOWN;
+        p->anim.velocity=10;
+        if (p->anim.frame >= anim_num_frames(DOWN) - 1){
+            p->anim.frame = anim_num_frames(DOWN) - 1;
             return;
         }
     }
     
     else if (!p->control->left && !p->control->right){
-        p->anim_state = IDLE;
-        p->anim_velocity=25;
+        p->anim.state = IDLE;
+        p->anim.velocity=25;
     }
     else{
-        p->anim_state = CORRENDO;
-        p->anim_velocity = 5;
+        p->anim.state = CORRENDO;
+        p->anim.velocity = 5;
     } 
 
 
-    if (prev_state != p->anim_state){
-        p->anim_timer = 0;
-        p->anim_frame = 0;
+    if (prev_state != p->anim.state){
+        p->anim.timer = 0;
+        p->anim.frame = 0;
+        p->anim.frame_count = anim_num_frames(p->anim.state);
     }   
-
-
-    p->anim_timer++;
-    if (p->anim_timer >= p->anim_velocity) { // velocidade da anim
-        p->anim_timer = 0;
-        p->anim_frame = (p->anim_frame+1) % anim_num_frames(p->anim_state);
-    }
-
+    anim_update(&p->anim);
 }
 
 void player_destroy(player *p){																													//Implementação da função "player_destroy"

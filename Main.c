@@ -50,7 +50,7 @@ int main(){
 	ALLEGRO_BITMAP* game_over = al_load_bitmap("Assets/game_over.png") ;
 	ALLEGRO_BITMAP* game_menu = al_load_bitmap("Assets/menu_inicial.png") ;
 
-	ALLEGRO_BITMAP* tile_sprites[8];
+	ALLEGRO_BITMAP* tile_sprites[9];
 	tile_sprites[TILE_BACK] = al_load_bitmap("Assets/teste3.png");
 	tile_sprites[TILE_WALL]  = al_load_bitmap("Assets/parede.png");    // gaveta 1
 	tile_sprites[TILE_FLOOR1] = al_load_bitmap("Assets/chao.png");     // gaveta 2
@@ -58,6 +58,7 @@ int main(){
 	tile_sprites[TILE_SPIKE] = al_load_bitmap("Assets/spike.png"); // gaveta 3
 	tile_sprites[TILE_EMPTY] = al_load_bitmap("Assets/back3.png");
 	tile_sprites[TILE_LASER] = NULL;
+	tile_sprites[TILE_AIR_SPIKE] = al_load_bitmap("Assets/spike(1).png");
 	
 	ALLEGRO_BITMAP* anim_sheets[4]; // um por estado
 	anim_sheets[IDLE] = al_load_bitmap("Assets/player/player_idle.png");
@@ -142,8 +143,8 @@ int main(){
 			
 				int flip = (player->direcao == 0) ? ALLEGRO_FLIP_HORIZONTAL : 0;
 				ALLEGRO_BITMAP* frame = al_create_sub_bitmap(
-				anim_sheets[player->anim_state],
-				player->anim_frame * FRAME_W, 0,  // avança 8px por frame
+				anim_sheets[player->anim.state],
+				player->anim.frame * FRAME_W, 0,  // avança 8px por frame
 				FRAME_W, FRAME_H
 				);
 

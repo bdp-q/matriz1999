@@ -24,7 +24,7 @@ hitbox laser_build(int row, int col,int length, float tile_w, float tile_h) {
     return l;
 }
 
-bullet bullet_fire(bullet_spawner *s, unsigned short target_x, unsigned short target_y, float speed) {
+bullet bullet_build(bullet_spawner *s, unsigned short target_x, unsigned short target_y, float speed) {
     bullet b;
     b.x  = s->x;
     b.y  = s->y;

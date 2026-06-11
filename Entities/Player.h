@@ -4,6 +4,7 @@
 #include "Joystick.h"			//onde fica o movimento do jogador																										
 #include "Rooms/Room.h"
 #include "Hitbox.h"
+#include "Func/Anim.h"
 #define PLAYER_STEP 7			//Tamanho, em pixels, de um passo do jogador (movimento)
 #define IDLE 0
 #define CORRENDO 1
@@ -20,12 +21,9 @@ typedef struct {
 	float gravity;				//velocidade puxando ele pra baixo
 	joystick *control;			// movimento dele fica nessa struct	
 	int room_id;				//id do quarto que o player atualmente esta		
-	
-	int direcao;				//direção que o jogador esta olhando: 1 direita 0 esquerda
-	int anim_frame;				//em que ponto da animacao estamos
-	int anim_timer;				// a quanto tempo ela ta la
-	int anim_state;				//qual animação ele esta
-	int anim_velocity;			//qual a velocidade dessa animação
+	int direcao;
+
+	anim anim;
 
 } player;						//Struct do jogador
 

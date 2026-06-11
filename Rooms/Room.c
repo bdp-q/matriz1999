@@ -104,7 +104,7 @@ void room_update_bullets(room *r, unsigned player_x, unsigned short player_y, fl
             if (slot == -1 && r->bullet_count < 128)
                 slot = r->bullet_count++;
             if (slot != -1)
-                r->bullets[slot] = bullet_fire(s, player_x, player_y, 4.0f);
+                r->bullets[slot] = bullet_build(s, player_x, player_y, 4.0f);
                
         }
     }

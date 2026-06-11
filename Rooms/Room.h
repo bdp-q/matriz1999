@@ -11,7 +11,7 @@
 #define TILE_EMPTY 5
 #define TILE_LASER 6
 #define TILE_SHOOTER 7
-
+#define TILE_AIR_SPIKE 8
 #define ROOM_ROWS   30
 #define ROOM_COLS   40
 
