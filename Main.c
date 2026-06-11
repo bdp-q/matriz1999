@@ -8,6 +8,7 @@
 #include "Rooms/Room.h"
 #include "Rooms/Rooms.h"
 #include <stdio.h>
+#include <stdlib.h> 
 
 #define GAME_W 640
 #define GAME_H 480
@@ -15,6 +16,35 @@
 #define FRAME_H 48
 #define PLAYER_SCALE 1.12  
 #define TEMPO_VIDA 120   
+
+void post_effect(int w, int h) {
+    for (int y = 0; y < h; y += 2) {
+        al_draw_filled_rectangle(0, y, w, y + 1,
+            al_map_rgba(0, 0, 0, 80));
+    }
+
+    int steps = 40;
+    int max_size = 10;
+
+    for (int i = 0; i < steps; i++) {
+        float t = 1.0f - (float)i / steps;   // 1.0 na borda, 0.0 no centro
+        int alpha = (int)(t * t * 160);
+        int s = (int)((float)i / steps * max_size);
+
+		//esquerda
+        al_draw_filled_rectangle(0, 0, s, h, al_map_rgba(0, 0, 0, alpha));
+        // direita
+        al_draw_filled_rectangle(w - s, 0, w, h, al_map_rgba(0, 0, 0, alpha));
+        // cima
+        al_draw_filled_rectangle(0, 0, w, s, al_map_rgba(0, 0, 0, alpha));
+        // baixo
+        al_draw_filled_rectangle(0, h - s, w, h, al_map_rgba(0, 0, 0, alpha));
+    }
+
+    int flicker = rand() % 15;
+    al_draw_filled_rectangle(0, 0, w, h,
+        al_map_rgba(0, 0, 0, flicker));
+}
 
 int main(){
 	//inicializações da allegro
@@ -161,6 +191,7 @@ int main(){
 				al_destroy_bitmap(frame); 
 				al_draw_text(font, al_map_rgb(255, 255, 255), 550, 50, 0, texto_timer);
 			}	
+			post_effect(GAME_W, GAME_H);
 			al_flip_display();
 		}
 		else if((event.type == 10) || (event.type == 12)){	//eventos de teclado 
