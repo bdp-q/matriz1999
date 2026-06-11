@@ -13,6 +13,42 @@ hitbox spike_build(int row, int col, float tile_w, float tile_h) {
     return s;
 }
 
+air_spike air_spike_build(int row, int col, float tile_w, float tile_h) {
+    air_spike as;
+    
+    as.hb.x  = col * tile_w + tile_w * 0.5f;
+    as.hb.y  = row * tile_h + tile_h * 0.5f;
+    as.hb.hw = tile_w * 0.5f;
+    as.hb.hh = tile_h * 0.5f;
+    as.anim.frame = 0;
+    as.anim.frame_count=4;
+    as.anim.timer=0;
+    as.anim.velocity=3;
+    return as;
+}
+
+moving_spike moving_spike_build(int row, int col, float tile_w, float tile_h) {
+    moving_spike ms;
+    
+    
+    ms.x = col * tile_w + tile_w * 0.5f;
+    ms.y = row * tile_h + tile_h * 0.5f;
+    ms.hb.x = (unsigned short)ms.x;
+    ms.hb.y = (unsigned short)ms.y;
+    ms.hb.hw = tile_w * 0.5f;
+    ms.hb.hh = tile_h * 0.5f;
+    ms.anim.frame = 0;
+    ms.anim.frame_count=2;
+    ms.anim.timer=0;
+    ms.anim.velocity=3;
+    ms.direcao =1;
+    ms.moved = 0.0f;
+    ms.range = 4 * tile_w;
+    ms.vx = 2.0f;
+
+    return ms;
+}
+
 hitbox laser_build(int row, int col,int length, float tile_w, float tile_h) {
     hitbox l;
     float total_height = length * tile_h;

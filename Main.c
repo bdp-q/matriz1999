@@ -30,8 +30,8 @@ int main(){
 	ALLEGRO_FONT* font = al_create_builtin_font();			//Carrega uma fonte padrão para escrever na tela
 	ALLEGRO_DISPLAY* disp = al_create_display(640, 480);	//Cria uma janela padrão para o programa 
 	al_init_image_addon(); // precisa disso pra carregar imagens
+	
 	//pego o tamanho da sua tela fullscreen
-	ALLEGRO_DISPLAY_MODE disp_data;
 	int real_w = al_get_display_width(disp);
 	int real_h = al_get_display_height(disp);
 	
@@ -50,16 +50,18 @@ int main(){
 	ALLEGRO_BITMAP* game_over = al_load_bitmap("Assets/game_over.png") ;
 	ALLEGRO_BITMAP* game_menu = al_load_bitmap("Assets/menu_inicial.png") ;
 
-	ALLEGRO_BITMAP* tile_sprites[9];
+	ALLEGRO_BITMAP* tile_sprites[10];
 	tile_sprites[TILE_BACK] = al_load_bitmap("Assets/teste3.png");
-	tile_sprites[TILE_WALL]  = al_load_bitmap("Assets/parede.png");    // gaveta 1
-	tile_sprites[TILE_FLOOR1] = al_load_bitmap("Assets/chao.png");     // gaveta 2
-	tile_sprites[TILE_FLOOR2] = al_load_bitmap("Assets/chao3.png");    // gaveta 2
-	tile_sprites[TILE_SPIKE] = al_load_bitmap("Assets/spike.png"); // gaveta 3
+	tile_sprites[TILE_WALL]  = al_load_bitmap("Assets/parede.png");
+	tile_sprites[TILE_FLOOR1] = al_load_bitmap("Assets/chao.png"); 
+	tile_sprites[TILE_FLOOR2] = al_load_bitmap("Assets/chao3.png");
+	tile_sprites[TILE_SPIKE] = al_load_bitmap("Assets/spike.png"); 
 	tile_sprites[TILE_EMPTY] = al_load_bitmap("Assets/back3.png");
 	tile_sprites[TILE_LASER] = NULL;
-	tile_sprites[TILE_AIR_SPIKE] = al_load_bitmap("Assets/spike(1).png");
-	
+	tile_sprites[TILE_AIR_SPIKE] = al_load_bitmap("Assets/air_spike.png");
+	tile_sprites[TILE_MOVING_SPIKE] = al_load_bitmap("Assets/moving_spike.png");
+
+
 	ALLEGRO_BITMAP* anim_sheets[4]; // um por estado
 	anim_sheets[IDLE] = al_load_bitmap("Assets/player/player_idle.png");
 	anim_sheets[CORRENDO]= al_load_bitmap("Assets/player/player_run.png");	
@@ -88,7 +90,7 @@ int main(){
 	int death = 0;
 	int frames = 0;
     int tempo_restante = TEMPO_VIDA;
-    char texto_timer[10]; 
+    char texto_timer[12]; 
     
 
 	al_start_timer(timer);
@@ -119,11 +121,6 @@ int main(){
 						tempo_restante--;
 					frames = 0;	
 				}
-				rooms[player->room_id].laser_timer++;
-				if (rooms[player->room_id].laser_timer >= 180) {
-					rooms[player->room_id].laser_timer = 0;
-					rooms[player->room_id].lasers_on = !rooms[player->room_id].lasers_on;
-				}
 				if (tempo_restante <= 0){
 					game_start = 0;	
 					death = 1;
@@ -136,7 +133,7 @@ int main(){
 				//calcula a gravidade
 				player_update(player,rooms, GAME_W, GAME_H);
 
-				room_update_bullets(&rooms[player->room_id],player->x, player->y,tile_w, tile_h);
+				room_update(&rooms[player->room_id],player->x, player->y,tile_w, tile_h);
 			
 				//pinta a tela e os personagens
 				room_draw(&rooms[player->room_id],tile_w,tile_h,tile_sprites);	
@@ -190,9 +187,9 @@ int main(){
 	}
 
 	//funções destrutoras para limpar a casa antes do programa acabar
-	al_destroy_bitmap(tile_sprites[TILE_WALL]);
-	al_destroy_bitmap(tile_sprites[TILE_FLOOR1]);
-	al_destroy_bitmap(*tile_sprites);
+	for (int i = 0; i < 10; i++)
+    if (tile_sprites[i])
+        al_destroy_bitmap(tile_sprites[i]);
 	al_destroy_bitmap(game_menu);
 	al_destroy_bitmap(game_over);
 	player_destroy(player);

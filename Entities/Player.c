@@ -59,6 +59,16 @@ void check_laser_damage(player *p, room *r) {
     }
 }
 
+void check_air_spike_damage(player *p, room *r) {
+    hitbox ph = { p->x, p->y, p->side * 0.5f, p->side * 0.5f };
+    for (int i = 0; i < r->air_spikes_count; i++) {
+        if (hitbox_collide(&ph, &r->air_spikes[i].hb)) {
+            p->is_damaged = 1;
+            break;
+        }
+    }
+}
+
 void check_bullet_damage(player *p, room *r) {
     hitbox ph = { p->x, p->y, p->side * 0.5f, p->side * 0.5f };
     
@@ -140,6 +150,7 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
     check_spike_damage(p,&rooms[p->room_id]);
     check_laser_damage(p,&rooms[p->room_id]);
     check_bullet_damage(p, &rooms[p->room_id]);
+    check_air_spike_damage(p,&rooms[p->room_id]);
 
     if (p->y > max_y)
         p->is_damaged = 1;

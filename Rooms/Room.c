@@ -20,6 +20,8 @@ void room_draw(room *r,float tile_w, float tile_h, ALLEGRO_BITMAP* tile_sprites[
                     al_get_bitmap_height(tile_sprites[TILE_BACK]),
                     x, y, tile_w, tile_h, 0);
             }
+            if((sprite == tile_sprites[TILE_AIR_SPIKE]) ||sprite == tile_sprites[TILE_MOVING_SPIKE]) continue;
+
             if (sprite) {
                 // tem sprite na gaveta: desenha ele escalado pro tamanho do tile
                 al_draw_scaled_bitmap(sprite,
@@ -46,7 +48,30 @@ void room_draw(room *r,float tile_w, float tile_h, ALLEGRO_BITMAP* tile_sprites[
         if (b->active)
             al_draw_filled_circle(b->x, b->y, b->hw, al_map_rgb(255, 165, 0));
     }
+    for (int i = 0; i < r->air_spikes_count; i++) {
+        air_spike *as = &r->air_spikes[i];
+        al_draw_scaled_bitmap(
+        tile_sprites[TILE_AIR_SPIKE],
+        as->anim.frame * 48, 0,      // recorte: pula N frames pra direita
+        48, 48,           // tamanho do recorte na spritesheet
+        as->hb.x - as->hb.hw, as->hb.y -  as->hb.hh,              // posição na tela
+        tile_w, tile_h,             // tamanho na tela
+        0
+        );
+    }
+    for (int i = 0; i < r->moving_spikes_count; i++) {
+        moving_spike *ms = &r->moving_spikes[i];
+        int flip = (ms->direcao == -1) ? ALLEGRO_FLIP_HORIZONTAL : 0;
 
+        al_draw_scaled_bitmap(
+        tile_sprites[TILE_MOVING_SPIKE],
+        ms->anim.frame * 48, 0,      // recorte: pula N frames pra direita
+        48, 48,           // tamanho do recorte na spritesheet
+        ms->x - ms->hb.hw, ms->y -  ms->hb.hh,              // posição na tela
+        tile_w, tile_h,             // tamanho na tela
+        flip
+        );
+    }
 }
 
 void room_build_obstacles(room *r, float tile_w, float tile_h) {
@@ -56,11 +81,20 @@ void room_build_obstacles(room *r, float tile_w, float tile_h) {
     r->lasers_on = 1;
     r->spawner_count = 0;
     r->bullet_count  = 0;
+    r->air_spikes_count = 0;
+    r->moving_spikes_count = 0;
 
     for (int row = 0; row < ROOM_ROWS; row++) {
         for (int col = 0; col < ROOM_COLS; col++) {
             if (r->tiles[row][col] == TILE_SPIKE)
                 r->spikes[r->spike_count++] = spike_build(row, col, tile_w, tile_h);
+            
+            else if(r->tiles[row][col] == TILE_AIR_SPIKE)
+                r->air_spikes[r->air_spikes_count++] = air_spike_build(row, col, tile_w, tile_h);
+
+            else if(r->tiles[row][col] == TILE_MOVING_SPIKE)
+                r->moving_spikes[r->moving_spikes_count++] = moving_spike_build(row, col, tile_w, tile_h);
+
             else if(r->tiles[row][col] == TILE_LASER){
                 int end_row = row + 1; // checa se bateu numa parede
                 while(end_row < ROOM_ROWS && 
@@ -73,7 +107,7 @@ void room_build_obstacles(room *r, float tile_w, float tile_h) {
                 r->lasers[r->laser_count++] = laser_build(row, col, length, tile_w, tile_h);  
             }
             else if (r->tiles[row][col] == TILE_SHOOTER) {
-                bullet_spawner sp;
+                bullet_spawner sp; // criar funçao "spawner_build"
                 sp.x        = col * tile_w + tile_w * 0.5f;
                 sp.y        = row * tile_h + tile_h * 0.5f;
                 sp.timer    = 0;
@@ -84,7 +118,7 @@ void room_build_obstacles(room *r, float tile_w, float tile_h) {
     }
 }
 
-void room_update_bullets(room *r, unsigned player_x, unsigned short player_y, float tile_w, float tile_h){
+void room_update(room *r, unsigned player_x, unsigned short player_y, float tile_w, float tile_h){
     float screen_w = tile_w * ROOM_COLS;
     float screen_h = tile_h * ROOM_ROWS;
 
@@ -116,4 +150,27 @@ void room_update_bullets(room *r, unsigned player_x, unsigned short player_y, fl
                 b->active = 0;
         }
     } 
+
+    r->laser_timer++;
+    if (r->laser_timer >= 60) {
+        r->laser_timer = 0;
+        r->lasers_on = !r->lasers_on;
+    }
+
+    for (int i = 0; i < r->air_spikes_count; i++) {
+        anim_update(&r->air_spikes[i].anim);
+    }
+    for (int i = 0; i < r->moving_spikes_count; i++) {
+        moving_spike *ms = &r->moving_spikes[i];
+        anim_update(&ms->anim);
+
+        ms->x += ms->direcao * ms->vx;
+        ms->moved += ms->vx;
+
+        if (ms->moved >= ms->range) {
+            ms->moved = 0.0f;
+            ms->direcao  *= -1;
+        }
+        ms->hb.x = (unsigned short)ms->x;
+    }
 }
