@@ -39,10 +39,10 @@ typedef struct {
     int lasers_on;
     int laser_timer;
 
-    bullet_spawner spawners[16]; 
+    bullet_spawner spawners[64]; 
     int spawner_count;
     
-    bullet bullets[128]; 
+    bullet bullets[256]; 
     int bullet_count;
 
 } room;

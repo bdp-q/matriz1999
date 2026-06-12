@@ -15,7 +15,7 @@
 #define FRAME_W 48 
 #define FRAME_H 48
 #define PLAYER_SCALE 1.12  
-#define TEMPO_VIDA 120   
+#define TEMPO_VIDA 120        
 
 void post_effect(int w, int h) {
     for (int y = 0; y < h; y += 2) {
@@ -76,9 +76,13 @@ int main(){
 	al_scale_transform(&transform, scale, scale);
 	al_translate_transform(&transform, offset_x, offset_y);
 
-
 	ALLEGRO_BITMAP* game_over = al_load_bitmap("Assets/Menus/game_over.png") ;
-	ALLEGRO_BITMAP* game_menu = al_load_bitmap("Assets/Menus/menu_inicial.png") ;
+	ALLEGRO_BITMAP* tile_start[4];
+
+	tile_start[0] = al_load_bitmap("Assets/Menus/cutscene1.png") ;
+	tile_start[1] = al_load_bitmap("Assets/Menus/cutscene2.png") ;
+	tile_start[2] = al_load_bitmap("Assets/Menus/cutscene3.png") ;
+	tile_start[3] = al_load_bitmap("Assets/Menus/menu_inicial.png") ;
 
 	ALLEGRO_BITMAP* tile_sprites[11];
 	tile_sprites[TILE_BACK] = al_load_bitmap("Assets/Props/background.png");
@@ -105,7 +109,7 @@ int main(){
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 
 
-	room rooms[] = {room0,room1,room2,room3}; 
+	room rooms[] = {room0,room1,room2,room3,room4}; 
 
 	player* player = player_create(GAME_W/35, 100, 49, GAME_W, GAME_H,10);
 	if (!player) return 1;	
@@ -113,7 +117,7 @@ int main(){
 	float tile_w = GAME_W / ROOM_COLS;
 	float tile_h = GAME_H / ROOM_ROWS;
  
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 5; i++)
 		room_build_obstacles(&rooms[i],tile_w,tile_h);
 
 	ALLEGRO_EVENT event= {0};
@@ -122,8 +126,8 @@ int main(){
 	int frames = 0;
     int tempo_restante = TEMPO_VIDA;
     char texto_timer[12]; 
-    
-
+    int start = 0;
+	int game_end = 0;
 	al_start_timer(timer);
 
 	//laço principal do nosso programa															
@@ -140,8 +144,10 @@ int main(){
 			al_use_transform(&transform);
 			al_draw_filled_rectangle(0, 0, GAME_W, GAME_H, al_map_rgb(1, 1, 1));
 			if(!game_start){
-				if(!death)
-					al_draw_bitmap(game_menu, 0, 0, 0);
+				if(game_end)
+					al_draw_bitmap();
+				else if(!death)
+					al_draw_bitmap(tile_start[start], 0, 0, 0);
 				else
 					al_draw_bitmap(game_over, 0, 0, 0);
 			}
@@ -159,12 +165,14 @@ int main(){
 					player->x = 100;
 					player->y = 49 ; 	   
 					player->room_id = 0;
-				}
+				}     
 				sprintf(texto_timer, "%d", tempo_restante);
 
 				//calcula a gravidade
-				player_update(player,rooms, GAME_W, GAME_H, &tempo_restante);
-
+				if(player_update(player,rooms, GAME_W, GAME_H, &tempo_restante)){
+					game_end = 1;
+					game_start = 0;
+				}
 				room_update(&rooms[player->room_id],player->x, player->y,tile_w, tile_h,player->control->down);
 			
 				//pinta a tela e os personagens
@@ -202,9 +210,14 @@ int main(){
 					player->gravity *= 0.5;
 			}
 
-			else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER){
-				game_start = 1;
-				death = 0;
+			else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER && event.type == 10){
+				fprintf(stderr,"%d",start);
+				if(start < 3)
+					start += 1;
+				else{
+					death = 0;
+					game_start = 1;
+				}
 			}
 
 			else if(event.keyboard.keycode == ALLEGRO_KEY_E && event.type == 10){
@@ -215,12 +228,15 @@ int main(){
 
 				if(rooms[player->room_id].tiles[row][col] == TILE_RED_PILL){
 					player->in_action = 1;
-					player->anim.frame = 0;   // começa do frame 0, não -2
+					player->anim.frame = 0;  
 					player->anim.timer = 0;
 				}
 			}
 			else if(event.keyboard.keycode == ALLEGRO_KEY_S || event.keyboard.keycode == ALLEGRO_KEY_DOWN){
-				joystick_down(player->control);
+   				 if (event.type == 10)
+        			joystick_down(player->control);
+    			else if (event.type == 12)
+        			player->control->down = 0;
 			}
 			else if(event.keyboard.keycode == ALLEGRO_KEY_A || event.keyboard.keycode == ALLEGRO_KEY_LEFT) //movimento pra esquerda (a ou setinha)
 				joystick_left(player->control);
@@ -242,7 +258,11 @@ int main(){
     if (anim_sheets[i])
         al_destroy_bitmap(anim_sheets[i]);
 		
-	al_destroy_bitmap(game_menu);
+
+	for (int i = 0; i < 4; i++)
+    if (tile_start[i])
+        al_destroy_bitmap(tile_start[i]);
+
 	al_destroy_bitmap(game_over);
 	player_destroy(player);
 	al_destroy_font(font);															

@@ -36,7 +36,7 @@ player* player_create(unsigned char side, unsigned short x, unsigned short y, un
 void player_move(player *p, char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y);
 
 //função que atualiza o jogador
-void player_update(player *p,room *r, unsigned short max_x, unsigned short max_y, int *tempo);
+int player_update(player *p,room *r, unsigned short max_x, unsigned short max_y, int *tempo);
 
 //função que libera a memória do jogador na hora do programa encerrar
 void player_destroy(player *p);

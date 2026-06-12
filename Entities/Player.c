@@ -87,7 +87,7 @@ void check_damage(player *p, room *r){
 }
 
 int tile_has_collision(player *p, int tile) {  
-    return  tile == TILE_WALL || tile == TILE_FLOOR1 || tile == TILE_FLOOR2;
+    return  tile == TILE_WALL || tile == TILE_FLOOR1 || tile == TILE_SHOOTER;
 }
 
 int colision_left(player *p, room *r, unsigned short x_screen, unsigned short y_screen){
@@ -146,17 +146,20 @@ static int anim_num_frames(int state){
     }
 }
 
-void player_update(player *p, room rooms[], unsigned short max_x, unsigned short max_y, int *tempo){
+int player_update(player *p, room rooms[], unsigned short max_x, unsigned short max_y, int *tempo){
     int prev_state = p->anim.state;
     int tile_w = max_x/ROOM_COLS;
     int tile_h = max_y / ROOM_ROWS;
+
+    if (rooms[p->room_id].tiles[(int)(p->y) / tile_h][(int)(p->x) / tile_w] == 13)
+        return 1;
 
     check_damage(p,&rooms[p->room_id]);
 
     if (p->y > max_y)
         p->is_damaged = 1;
 
-    if(!p->in_action && (!p->control->down || !p->is_down)){
+    if((!p->in_action) && (!p->control->down || !p->is_down)){
         if (p->control->left){
             p->direcao=0;
             player_move(p, 1, 0, max_x, max_y);
@@ -208,6 +211,7 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
         *tempo = *tempo - 5;
         p->x = 100;
         p->y = 49;
+        p->control->down = 0;
         p->is_damaged = 0;
         p->gravity=0;
     }
@@ -217,7 +221,7 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
         p->anim.velocity = 7;
         if(p->gravity > 0 ){
         if (p->anim.frame >= anim_num_frames(PULANDO) - 3)
-            return;
+            return 0;
         }
     }
 
@@ -226,7 +230,7 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
         p->anim.velocity=10;
         if (p->anim.frame >= anim_num_frames(DOWN) - 1){
             p->anim.frame = anim_num_frames(DOWN) - 1;
-            return;
+            return 0;
         }
     }
     else if (p->in_action){
@@ -258,6 +262,7 @@ void player_update(player *p, room rooms[], unsigned short max_x, unsigned short
         p->anim.frame_count = anim_num_frames(p->anim.state);
     }   
     anim_update(&p->anim);
+    return 0;
 }
 
 void player_destroy(player *p){																													//Implementação da função "player_destroy"
