@@ -15,7 +15,7 @@
 #define FRAME_W 48 
 #define FRAME_H 48
 #define PLAYER_SCALE 1.12  
-#define TEMPO_VIDA 120        
+#define TEMPO_VIDA 1000        
 
 void post_effect(int w, int h) {
     for (int y = 0; y < h; y += 2) {
@@ -75,16 +75,17 @@ int main(){
 	al_identity_transform(&transform);
 	al_scale_transform(&transform, scale, scale);
 	al_translate_transform(&transform, offset_x, offset_y);
-
+	ALLEGRO_BITMAP* game_ended = al_load_bitmap("Assets/Menus/game_end.png") ;
 	ALLEGRO_BITMAP* game_over = al_load_bitmap("Assets/Menus/game_over.png") ;
-	ALLEGRO_BITMAP* tile_start[4];
+	ALLEGRO_BITMAP* tile_start[5];
 
 	tile_start[0] = al_load_bitmap("Assets/Menus/cutscene1.png") ;
 	tile_start[1] = al_load_bitmap("Assets/Menus/cutscene2.png") ;
 	tile_start[2] = al_load_bitmap("Assets/Menus/cutscene3.png") ;
-	tile_start[3] = al_load_bitmap("Assets/Menus/menu_inicial.png") ;
+	tile_start[3] = al_load_bitmap("Assets/Menus/instructions.png");
+	tile_start[4] = al_load_bitmap("Assets/Menus/menu_inicial.png") ;
 
-	ALLEGRO_BITMAP* tile_sprites[11];
+	ALLEGRO_BITMAP* tile_sprites[12];
 	tile_sprites[TILE_BACK] = al_load_bitmap("Assets/Props/background.png");
 	tile_sprites[TILE_WALL]  = al_load_bitmap("Assets/Props/parede.png"); 
 	tile_sprites[TILE_FLOOR1] = al_load_bitmap("Assets/Props/chao.png"); 
@@ -96,6 +97,7 @@ int main(){
 	tile_sprites[TILE_AIR_SPIKE] = al_load_bitmap("Assets/Hazards/air_spike.png");
 	tile_sprites[TILE_MOVING_SPIKE] = al_load_bitmap("Assets/Hazards/moving_spike.png");
 	tile_sprites[TILE_RED_PILL] = al_load_bitmap("Assets/Props/red_pill.png");
+	tile_sprites[11] = al_load_bitmap("Assets/Props/end.png");
 
 	ALLEGRO_BITMAP* anim_sheets[5]; // um por estado
 	anim_sheets[IDLE] = al_load_bitmap("Assets/Player/player_idle.png");
@@ -145,7 +147,7 @@ int main(){
 			al_draw_filled_rectangle(0, 0, GAME_W, GAME_H, al_map_rgb(1, 1, 1));
 			if(!game_start){
 				if(game_end)
-					al_draw_bitmap();
+					al_draw_bitmap(game_ended,0,0,0);
 				else if(!death)
 					al_draw_bitmap(tile_start[start], 0, 0, 0);
 				else
@@ -165,6 +167,12 @@ int main(){
 					player->x = 100;
 					player->y = 49 ; 	   
 					player->room_id = 0;
+					
+					room rooms_reset[] = {room0, room1, room2, room3, room4};
+    				for (int i = 0; i < 5; i++){
+				        rooms[i] = rooms_reset[i];
+        				room_build_obstacles(&rooms[i], tile_w, tile_h);
+    				}
 				}     
 				sprintf(texto_timer, "%d", tempo_restante);
 
@@ -208,11 +216,16 @@ int main(){
 				joystick_up(player->control);
 				if((event.type == 12 && player->gravity < 0))// se o jogador soltar o espaço ele pula menos!
 					player->gravity *= 0.5;
-			}
+			} 
 
-			else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER && event.type == 10){
-				fprintf(stderr,"%d",start);
-				if(start < 3)
+			else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER && event.type == 10){ 
+				if(game_end){
+					game_end = 0;
+					player->x = 100;
+					player->y = 49;
+					player->room_id = 0;
+				}
+				else if(start < 4)
 					start += 1;
 				else{
 					death = 0;
@@ -259,7 +272,7 @@ int main(){
         al_destroy_bitmap(anim_sheets[i]);
 		
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 5; i++)
     if (tile_start[i])
         al_destroy_bitmap(tile_start[i]);
 

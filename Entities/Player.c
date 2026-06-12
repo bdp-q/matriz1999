@@ -151,7 +151,7 @@ int player_update(player *p, room rooms[], unsigned short max_x, unsigned short 
     int tile_w = max_x/ROOM_COLS;
     int tile_h = max_y / ROOM_ROWS;
 
-    if (rooms[p->room_id].tiles[(int)(p->y) / tile_h][(int)(p->x) / tile_w] == 13)
+    if (rooms[p->room_id].tiles[(int)(p->y) / tile_h][(int)(p->x) / tile_w] == 11)
         return 1;
 
     check_damage(p,&rooms[p->room_id]);
