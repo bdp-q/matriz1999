@@ -72,7 +72,8 @@ bullet bullet_build(bullet_spawner *s, unsigned short target_x, unsigned short t
     float dx = target_x - s->x;
     float dy = target_y - s->y;
     float dist = sqrtf(dx*dx + dy*dy);
-    if (dist == 0) dist = 1;  // evita divisão por zero
+    if (dist == 0) 
+        dist = 1;  // evita divisão por zero
 
     b.vx = (dx / dist) * speed;
     b.vy = (dy / dist) * speed;

@@ -17,17 +17,20 @@
 #define PLAYER_SCALE 1.12  
 #define TEMPO_VIDA 1000        
 
+// funcao pra dar cara de retro pro jogo
 void post_effect(int w, int h) {
-    for (int y = 0; y < h; y += 2) {
+    //cria linhas de tv velha
+	for (int y = 0; y < h; y += 2) {
         al_draw_filled_rectangle(0, y, w, y + 1,
             al_map_rgba(0, 0, 0, 80));
     }
 
+	//escurece as bordas
     int steps = 40;
     int max_size = 10;
 
     for (int i = 0; i < steps; i++) {
-        float t = 1.0f - (float)i / steps;   // 1.0 na borda, 0.0 no centro
+        float t = 1.0f - (float)i / steps;   
         int alpha = (int)(t * t * 160);
         int s = (int)((float)i / steps * max_size);
 
@@ -41,9 +44,10 @@ void post_effect(int w, int h) {
         al_draw_filled_rectangle(0, h - s, w, h, al_map_rgba(0, 0, 0, alpha));
     }
 
-    int flicker = rand() % 15;
+	//fica dando umas piscadas na tela
+    int pisca = rand() % 15;
     al_draw_filled_rectangle(0, 0, w, h,
-        al_map_rgba(0, 0, 0, flicker));
+        al_map_rgba(0, 0, 0, pisca));
 }
 
 int main(){
@@ -75,6 +79,8 @@ int main(){
 	al_identity_transform(&transform);
 	al_scale_transform(&transform, scale, scale);
 	al_translate_transform(&transform, offset_x, offset_y);
+
+	//carrega as imagens dos menus
 	ALLEGRO_BITMAP* game_ended = al_load_bitmap("Assets/Menus/game_end.png") ;
 	ALLEGRO_BITMAP* game_over = al_load_bitmap("Assets/Menus/game_over.png") ;
 	ALLEGRO_BITMAP* tile_start[5];
@@ -85,6 +91,7 @@ int main(){
 	tile_start[3] = al_load_bitmap("Assets/Menus/instructions.png");
 	tile_start[4] = al_load_bitmap("Assets/Menus/menu_inicial.png") ;
 
+	// carrega as imagens dos tiles
 	ALLEGRO_BITMAP* tile_sprites[12];
 	tile_sprites[TILE_BACK] = al_load_bitmap("Assets/Props/background.png");
 	tile_sprites[TILE_WALL]  = al_load_bitmap("Assets/Props/parede.png"); 
@@ -99,18 +106,20 @@ int main(){
 	tile_sprites[TILE_RED_PILL] = al_load_bitmap("Assets/Props/red_pill.png");
 	tile_sprites[11] = al_load_bitmap("Assets/Props/end.png");
 
-	ALLEGRO_BITMAP* anim_sheets[5]; // um por estado
+	//carrega os spritesheet do personagem
+	ALLEGRO_BITMAP* anim_sheets[5];
 	anim_sheets[IDLE] = al_load_bitmap("Assets/Player/player_idle.png");
 	anim_sheets[CORRENDO]= al_load_bitmap("Assets/Player/player_run.png");	
 	anim_sheets[PULANDO]= al_load_bitmap("Assets/Player/player_jump.png");	
 	anim_sheets[DOWN]= al_load_bitmap("Assets/Player/player_down.png");
 	anim_sheets[ACAO]= al_load_bitmap("Assets/Player/player_action.png");
+
 	// indica que eventos de teclado, tela e tempo vão ativar nossa fila de eventos
 	al_register_event_source(queue, al_get_keyboard_event_source());
 	al_register_event_source(queue, al_get_display_event_source(disp));
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 
-
+	// inicializa quarto e jogador
 	room rooms[] = {room0,room1,room2,room3,room4}; 
 
 	player* player = player_create(GAME_W/35, 100, 49, GAME_W, GAME_H,10);
@@ -145,6 +154,7 @@ int main(){
 
 			al_use_transform(&transform);
 			al_draw_filled_rectangle(0, 0, GAME_W, GAME_H, al_map_rgb(1, 1, 1));
+			// carrega cutscenes e menu inicial
 			if(!game_start){
 				if(game_end)
 					al_draw_bitmap(game_ended,0,0,0);
@@ -154,6 +164,7 @@ int main(){
 					al_draw_bitmap(game_over, 0, 0, 0);
 			}
 			else{
+				//conta o timer do jogo
 				frames++;
 				if(frames >= 30){
 					if(tempo_restante > 0)
@@ -189,17 +200,17 @@ int main(){
 				int flip = (player->direcao == 0) ? ALLEGRO_FLIP_HORIZONTAL : 0;
 				ALLEGRO_BITMAP* frame = al_create_sub_bitmap(
 				anim_sheets[player->anim.state],
-				player->anim.frame * FRAME_W, 0,  // avança 8px por frame
+				player->anim.frame * FRAME_W, 0, 
 				FRAME_W, FRAME_H
 				);
 
-				// desenha escalado e espelhado se necessário
+				// desenha o jogador
 				al_draw_scaled_bitmap(
 				frame,
 				0, 0,
 				FRAME_W, FRAME_H,
-				player->x - (player->side * PLAYER_SCALE) / 2,  // centraliza na posição do player
-				player->y - (player->side * PLAYER_SCALE) / 2 - 1, // -1 frame pra centralizar de volta o jogador
+				player->x - (player->side * PLAYER_SCALE) / 2,  
+				player->y - (player->side * PLAYER_SCALE) / 2 - 1, 
 				player->side * PLAYER_SCALE,
 				player->side * PLAYER_SCALE,
 				flip
@@ -262,7 +273,7 @@ int main(){
 		else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) break;
 	}
 
-	//funções destrutoras para limpar a casa antes do programa acabar
+	//funções destrutoras para fazer a boa antes do programa acabar
 	for (int i = 0; i < 10; i++)
     if (tile_sprites[i])
         al_destroy_bitmap(tile_sprites[i]);

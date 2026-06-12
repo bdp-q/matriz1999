@@ -9,6 +9,7 @@ typedef struct {
     int state;         //qual o estado a animação está (só pro player)
 } anim;
 
+//avanca a animacao
 void anim_update(anim *a);
 
 #endif

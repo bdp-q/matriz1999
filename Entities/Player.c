@@ -17,8 +17,7 @@ player* player_create(unsigned char side, unsigned short x, unsigned short y, un
 	player *new_player = (player*) malloc(sizeof(player));																				
 	new_player->side = side;																												
 	new_player->x = x;																												
-	new_player->y = y;																													
-	new_player->hp = hp;
+	new_player->y = y;	
 	new_player->control = joystick_create();
     new_player->room_id = 0;
     new_player->anim.frame=0;
@@ -151,11 +150,12 @@ int player_update(player *p, room rooms[], unsigned short max_x, unsigned short 
     int tile_w = max_x/ROOM_COLS;
     int tile_h = max_y / ROOM_ROWS;
 
-    if (rooms[p->room_id].tiles[(int)(p->y) / tile_h][(int)(p->x) / tile_w] == 11)
+    if (rooms[p->room_id].tiles[(int)(p->y) / tile_h][(int)(p->x) / tile_w] == 11)//cabou o jogo
         return 1;
 
     check_damage(p,&rooms[p->room_id]);
 
+    //caiu em buraco
     if (p->y > max_y)
         p->is_damaged = 1;
 
@@ -196,7 +196,7 @@ int player_update(player *p, room rooms[], unsigned short max_x, unsigned short 
             p->is_down = 0;
         }
 
-        if (p->x - p->side/2 <= 0){
+        if (p->x - p->side/2 <= 0){ //vai para a esquerda (no outro mapa)
             p->room_id = rooms[p->room_id].left_id;
             p->x = max_x - p->side;
         }
@@ -215,7 +215,7 @@ int player_update(player *p, room rooms[], unsigned short max_x, unsigned short 
         p->is_damaged = 0;
         p->gravity=0;
     }
-    
+    //seta animacoes
     if (!p->is_down){
         p->anim.state = PULANDO;
         p->anim.velocity = 7;

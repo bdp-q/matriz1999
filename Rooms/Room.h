@@ -47,9 +47,12 @@ typedef struct {
 
 } room;
 
+// funcao que desenha os sprites dos tiles
 void room_draw(room *r,float tile_w, float tile_h,ALLEGRO_BITMAP* tile_sprites[]);
 
+// funcao que cria os inimigos no jogo
 void room_build_obstacles(room *r, float tile_w, float tile_h);
 
+// funcao que atualiza inimigos dinamicos no jogo
 void room_update(room *r, unsigned player_x, unsigned short player_y, float tile_w, float tile_h,int is_down);
 #endif

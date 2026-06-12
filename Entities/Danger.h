@@ -38,6 +38,8 @@ typedef struct {
     float moved;            //quanto moveu
     float range;            //quanto precisa pra mudar de direcao
 } moving_spike;
+
+//constroi o spike
 hitbox spike_build(int row, int col, float tile_w, float tile_h);
 
 air_spike air_spike_build(int row, int col, float tile_w, float tile_h);
@@ -48,6 +50,7 @@ hitbox laser_build(int row, int col, int length, float tile_w, float tile_h);
 
 bullet bullet_build(bullet_spawner *s, unsigned short target_x, unsigned short target_y, float speed);
 
+//atualiza a posicao da bala
 void bullet_update(bullet *b, int is_down);
 
 #endif

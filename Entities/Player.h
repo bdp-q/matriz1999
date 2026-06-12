@@ -16,14 +16,13 @@ typedef struct {
 	unsigned char side;			//Tamanmho da lateral da hitbox do jogador
 	unsigned short x;			//Posição X 
 	unsigned short y;			//Posição Y do centro do jogador
-	unsigned char hp;
-	char is_damaged;
+	char is_damaged;			//player levou dano
 	char is_down;				//diz se o jogador esta tocando em algo no chão
-	char in_action;
+	char in_action;				//player ta pegando red pill?
 	float gravity;				//velocidade puxando ele pra baixo
 	joystick *control;			// movimento dele fica nessa struct	
 	int room_id;				//id do quarto que o player atualmente esta		
-	int direcao;
+	int direcao;				//player ta olhando pra onde? 1 é direita 0 esquerda
 
 	anim anim;
 

@@ -2,8 +2,8 @@
 #define __HITBOX__
 
 typedef struct {
-    unsigned short x;			//Posição X 
-	unsigned short y;			//Posição Y 
+    unsigned short x;			//Posição x 
+	unsigned short y;			//Posição y 
     float hw;                   // metade da largura
     float hh;                   //metade da altura
 } hitbox;
