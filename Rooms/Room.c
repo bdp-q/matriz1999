@@ -25,7 +25,6 @@ void room_draw(room *r,float tile_w, float tile_h, ALLEGRO_BITMAP* tile_sprites[
             if((sprite == tile_sprites[TILE_AIR_SPIKE]) ||sprite == tile_sprites[TILE_MOVING_SPIKE]) continue;
 
             if (sprite) {
-                // tem sprite na gaveta: desenha ele escalado pro tamanho do tile
                 al_draw_scaled_bitmap(sprite,
                     0, 0,
                     al_get_bitmap_width(sprite),
@@ -34,7 +33,6 @@ void room_draw(room *r,float tile_w, float tile_h, ALLEGRO_BITMAP* tile_sprites[
                     0);
             } 
             else {
-                // gaveta sem sprite: desenha retângulo colorido (útil pra debug)
                 al_draw_filled_rectangle(x, y, x+tile_w, y+tile_h, al_map_rgb(0, 0, 255));
             }
         }
@@ -55,10 +53,10 @@ void room_draw(room *r,float tile_w, float tile_h, ALLEGRO_BITMAP* tile_sprites[
         air_spike *as = &r->air_spikes[i];
         al_draw_scaled_bitmap(
         tile_sprites[TILE_AIR_SPIKE],
-        as->anim.frame * 48, 0,      // recorte: pula N frames pra direita
-        48, 48,           // tamanho do recorte na spritesheet
-        as->hb.x - as->hb.hw, as->hb.y -  as->hb.hh,              // posição na tela
-        tile_w, tile_h,             // tamanho na tela
+        as->anim.frame * 48, 0,      
+        48, 48,          
+        as->hb.x - as->hb.hw, as->hb.y -  as->hb.hh,
+        tile_w, tile_h,
         0
         );
     }
@@ -68,10 +66,10 @@ void room_draw(room *r,float tile_w, float tile_h, ALLEGRO_BITMAP* tile_sprites[
 
         al_draw_scaled_bitmap(
         tile_sprites[TILE_MOVING_SPIKE],
-        ms->anim.frame * 48, 0,      // recorte: pula N frames pra direita
-        48, 48,           // tamanho do recorte na spritesheet
-        ms->x - ms->hb.hw, ms->y -  ms->hb.hh,              // posição na tela
-        tile_w, tile_h,             // tamanho na tela
+        ms->anim.frame * 48, 0, 
+        48, 48,
+        ms->x - ms->hb.hw, ms->y -  ms->hb.hh, 
+        tile_w, tile_h, 
         flip
         );
     }
@@ -110,11 +108,11 @@ void room_build_obstacles(room *r, float tile_w, float tile_h) {
                 r->lasers[r->laser_count++] = laser_build(row, col, length, tile_w, tile_h);  
             }
             else if (r->tiles[row][col] == TILE_SHOOTER) {
-                bullet_spawner sp; // criar funçao "spawner_build"
+                bullet_spawner sp;
                 sp.x        = col * tile_w + tile_w * 0.5f;
                 sp.y        = row * tile_h + tile_h * 0.5f;
                 sp.timer    = 0;
-                sp.interval = 90;   // atira a cada 3 segundos (90 frames a 30fps)
+                sp.interval = 90;   // atira a cada 3 segundos
                 r->spawners[r->spawner_count++] = sp;
             }
         }
