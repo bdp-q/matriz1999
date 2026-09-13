@@ -15,7 +15,7 @@
 #define FRAME_W 48 
 #define FRAME_H 48
 #define PLAYER_SCALE 1.12  
-#define TEMPO_VIDA 1000        
+#define TEMPO_VIDA 200        
 
 // funcao pra dar cara de retro pro jogo
 void post_effect(int w, int h) {
